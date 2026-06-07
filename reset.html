@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Reset password · Tenuto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="center">
+    <div class="card">
+      <p class="wordmark">Tenuto<span class="dot">.</span></p>
+      <h1>Set a new password</h1>
+
+      <!-- Shown once a valid recovery session is detected -->
+      <form id="form" style="display:none">
+        <label for="pw">New password</label>
+        <input id="pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+        <label for="pw2">Confirm password</label>
+        <input id="pw2" type="password" autocomplete="new-password" placeholder="Re-enter password" />
+        <button id="submit" type="submit">Update password</button>
+        <div id="msg" class="msg"></div>
+      </form>
+
+      <!-- Shown while detecting, or on an invalid/expired link -->
+      <div id="status">
+        <p id="statusText">Checking your reset link…</p>
+      </div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // ⚠️ Fill these in with YOUR project values (both are public — the anon key
+    // ships in the mobile app too, so it's safe in a public repo).
+    const SUPABASE_URL = 'https://ldxptztqhklrbfhbkwdq.supabase.co'
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkeHB0enRxaGtscmJmaGJrd2RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA1OTU4OTEsImV4cCI6MjA5NjE3MTg5MX0.UzcxvV_5zJ28WMijKINySaeEAc1QZTG9goo6wtQuYW4'
+
+    const form = document.getElementById('form')
+    const statusEl = document.getElementById('status')
+    const statusText = document.getElementById('statusText')
+    const msg = document.getElementById('msg')
+
+    function showForm() { form.style.display = 'block'; statusEl.style.display = 'none' }
+    function showStatus(text) { statusText.textContent = text; statusEl.style.display = 'block'; form.style.display = 'none' }
+
+    // Surface an explicit error Supabase put in the URL (expired/invalid link).
+    const hash = new URLSearchParams(location.hash.slice(1))
+    if (hash.get('error')) {
+      showStatus(decodeURIComponent(hash.get('error_description') || 'This reset link is invalid or has expired. Request a new one from the app.'))
+    }
+
+    const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    // The recovery link establishes a temporary session (detectSessionInUrl).
+    let ready = false
+    function arm() { if (!ready) { ready = true; showForm() } }
+
+    sb.auth.onAuthStateChange((event, session) => {
+      if (session && (event === 'PASSWORD_RECOVERY' || event === 'SIGNED_IN')) arm()
+    })
+    sb.auth.getSession().then(({ data }) => { if (data.session) arm() })
+
+    // If nothing armed the form shortly after load, the link was bad.
+    setTimeout(() => { if (!ready && !hash.get('error')) showStatus('This reset link is invalid or has expired. Request a new one from the app.') }, 2500)
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      msg.className = 'msg'; msg.textContent = ''
+      const pw = document.getElementById('pw').value
+      const pw2 = document.getElementById('pw2').value
+      if (pw.length < 8) { msg.className = 'msg err'; msg.textContent = 'Use at least 8 characters.'; return }
+      if (pw !== pw2) { msg.className = 'msg err'; msg.textContent = 'Passwords don’t match.'; return }
+
+      const btn = document.getElementById('submit')
+      btn.disabled = true; btn.textContent = 'Updating…'
+      const { error } = await sb.auth.updateUser({ password: pw })
+      btn.disabled = false; btn.textContent = 'Update password'
+      if (error) { msg.className = 'msg err'; msg.textContent = error.message || 'Could not update password.'; return }
+
+      await sb.auth.signOut()
+      form.style.display = 'none'
+      showStatus('Password updated. Head back to the Tenuto app and sign in with your new password.')
+    })
+  </script>
+</body>
+</html>

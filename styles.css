@@ -1,0 +1,125 @@
+/* Tenuto public site — warm ivory canvas, single plum accent, Newsreader serif
+   "voice" for headings (matches the app's design tokens). */
+:root {
+  --bg: #f4efe6;
+  --card: #fbf8f2;
+  --field: #ffffff;
+  --ink: #221d17;
+  --ink2: #7a7164;
+  --ink3: #a9a093;
+  --accent: #6f4a8e;
+  --hair: rgba(34, 29, 23, 0.12);
+  --green: #3f8f5b;
+  --clay: #9a3b32;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 22px 80px;
+}
+
+.center {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--hair);
+  border-radius: 16px;
+  padding: 36px 28px;
+  width: 100%;
+  max-width: 440px;
+  text-align: center;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+}
+
+.wordmark {
+  font-family: "Newsreader", Georgia, "Times New Roman", serif;
+  font-size: 34px;
+  font-weight: 500;
+  margin: 0;
+}
+.wordmark .dot { color: var(--accent); }
+
+.tagline {
+  color: var(--ink2);
+  font-size: 15px;
+  margin: 6px 0 0;
+}
+.tagline .plum { color: var(--accent); }
+
+h1 {
+  font-family: "Newsreader", Georgia, serif;
+  font-weight: 500;
+  font-size: 26px;
+  margin: 28px 0 8px;
+}
+h2 {
+  font-size: 16px;
+  font-weight: 600;
+  margin: 28px 0 6px;
+}
+p { color: var(--ink2); margin: 8px 0; }
+.muted { color: var(--ink3); font-size: 13px; }
+
+.badge {
+  width: 64px; height: 64px; line-height: 64px;
+  border-radius: 999px;
+  background: rgba(63, 143, 91, 0.12);
+  color: var(--green);
+  font-size: 32px;
+  margin: 0 auto 8px;
+}
+
+label { display: block; text-align: left; font-size: 13px; color: var(--ink2); margin: 16px 0 6px; }
+input[type="password"] {
+  width: 100%;
+  padding: 13px 14px;
+  font-size: 16px;
+  border: 1px solid var(--hair);
+  border-radius: 10px;
+  background: var(--field);
+  color: var(--ink);
+}
+input:focus { outline: none; border-color: var(--accent); }
+
+button {
+  width: 100%;
+  margin-top: 20px;
+  padding: 14px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--card);
+  background: var(--ink);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+}
+button:disabled { opacity: 0.5; cursor: default; }
+
+.msg { margin-top: 14px; font-size: 14px; min-height: 20px; }
+.msg.err { color: var(--clay); }
+.msg.ok { color: var(--green); }
+
+a { color: var(--accent); }
+
+/* Legal pages: left-aligned long-form. */
+.doc { text-align: left; }
+.doc h1 { margin-top: 0; }
+footer { margin-top: 48px; color: var(--ink3); font-size: 13px; }
+footer a { margin-right: 16px; }
