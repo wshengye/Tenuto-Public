@@ -17,7 +17,8 @@
       <!-- Shown once a valid recovery session is detected -->
       <form id="form" style="display:none">
         <label for="pw">New password</label>
-        <input id="pw" type="password" autocomplete="new-password" placeholder="At least 8 characters" />
+        <input id="pw" type="password" autocomplete="new-password" placeholder="Create a password" />
+        <p class="muted" style="text-align:left;margin:6px 0 0">At least 12 characters, with an uppercase letter, a lowercase letter, a number, and a symbol.</p>
         <label for="pw2">Confirm password</label>
         <input id="pw2" type="password" autocomplete="new-password" placeholder="Re-enter password" />
         <button id="submit" type="submit">Update password</button>
@@ -71,7 +72,15 @@
       msg.className = 'msg'; msg.textContent = ''
       const pw = document.getElementById('pw').value
       const pw2 = document.getElementById('pw2').value
-      if (pw.length < 8) { msg.className = 'msg err'; msg.textContent = 'Use at least 8 characters.'; return }
+      // Must mirror lib/validators.ts (and the Supabase policy): 12+ with upper,
+      // lower, digit, symbol.
+      const need = []
+      if (pw.length < 12) need.push('at least 12 characters')
+      if (!/[A-Z]/.test(pw)) need.push('an uppercase letter')
+      if (!/[a-z]/.test(pw)) need.push('a lowercase letter')
+      if (!/[0-9]/.test(pw)) need.push('a number')
+      if (!/[^A-Za-z0-9]/.test(pw)) need.push('a symbol')
+      if (need.length) { msg.className = 'msg err'; msg.textContent = 'Password needs ' + need.join(', ') + '.'; return }
       if (pw !== pw2) { msg.className = 'msg err'; msg.textContent = 'Passwords don’t match.'; return }
 
       const btn = document.getElementById('submit')
