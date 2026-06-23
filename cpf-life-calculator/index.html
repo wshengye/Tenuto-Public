@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CPF LIFE Projection — Tenuto</title>
+<meta name="description" content="Estimate your CPF balances at retirement and your CPF LIFE monthly payouts across every plan. Nothing is saved." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&display=swap" rel="stylesheet" />
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Tenuto design tokens — "Relationships, on tempo."
+     Warm ivory canvas · single plum accent · Newsreader serif voice.
+  ───────────────────────────────────────────────────────────────*/
+  :root{
+    --bg:#F4EFE6; --bg2:#FBF8F2; --field:#FFFFFF;
+    --ink:#221D17; --ink2:#7A7164; --ink3:#A9A093;
+    --hair:rgba(34,29,23,0.12); --hair2:rgba(34,29,23,0.06);
+    --accent:#6F4A8E; --accentTint:#CBB6E0; --accentSoft:rgba(111,74,142,0.10);
+    --clay:#9A3B32; --green:#3F8F5B;
+    --serif:'Newsreader', Georgia, 'Times New Roman', serif;
+    --sans:-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    --shadow:0 1px 8px rgba(34,29,23,0.06);
+    --shadow-lg:0 16px 50px -18px rgba(34,29,23,0.28);
+    --r-sm:6px; --r-md:10px; --r-lg:16px; --r-xl:22px;
+  }
+  *{box-sizing:border-box; margin:0; padding:0}
+  html{scroll-behavior:smooth}
+  body{
+    font-family:var(--sans); color:var(--ink); background:var(--bg);
+    -webkit-font-smoothing:antialiased; line-height:1.5; overflow-x:hidden;
+    font-size:15px;
+  }
+  /* animated ambient field */
+  .ambient{position:fixed; inset:0; z-index:0; pointer-events:none; overflow:hidden}
+  .blob{position:absolute; border-radius:50%; filter:blur(70px); opacity:.5; animation:drift 26s ease-in-out infinite}
+  .blob.b1{width:46vw; height:46vw; left:-12vw; top:-14vw; background:radial-gradient(circle at 30% 30%, rgba(111,74,142,.30), transparent 65%)}
+  .blob.b2{width:40vw; height:40vw; right:-12vw; top:18vh; background:radial-gradient(circle at 60% 40%, rgba(203,182,224,.40), transparent 65%); animation-delay:-8s}
+  .blob.b3{width:38vw; height:38vw; left:24vw; bottom:-18vw; background:radial-gradient(circle at 50% 50%, rgba(154,59,50,.16), transparent 65%); animation-delay:-14s}
+  @keyframes drift{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(4vw,3vh) scale(1.08)}66%{transform:translate(-3vw,-2vh) scale(.96)}}
+  @media (prefers-reduced-motion: reduce){.blob{animation:none}}
+
+  .wrap{position:relative; z-index:1; max-width:1080px; margin:0 auto; padding:0 22px}
+
+  /* ── Masthead ───────────────────────────────────────────── */
+  header.mast{padding:64px 0 26px; text-align:center}
+  .brandrow{display:inline-flex; align-items:center; gap:9px; margin-bottom:30px;
+    opacity:0; animation:rise .8s .05s cubic-bezier(.2,.7,.2,1) forwards}
+  .mark{width:30px; height:30px; border-radius:50%; background:var(--ink); color:var(--bg2);
+    display:grid; place-items:center; font-size:14px}
+  .brandname{font-family:var(--serif); font-size:20px; letter-spacing:.2px}
+  .brandname em{font-style:italic; color:var(--accent)}
+  .kicker{font-family:var(--sans); font-size:10px; font-weight:600; letter-spacing:1.6px;
+    text-transform:uppercase; color:var(--accent); margin-bottom:14px;
+    opacity:0; animation:rise .8s .12s cubic-bezier(.2,.7,.2,1) forwards}
+  h1{font-family:var(--serif); font-weight:500; font-size:clamp(34px,6vw,58px);
+    line-height:1.04; letter-spacing:-.5px; margin-bottom:16px;
+    opacity:0; animation:rise .9s .18s cubic-bezier(.2,.7,.2,1) forwards}
+  h1 em{font-style:italic; color:var(--accent)}
+  .sub{max-width:560px; margin:0 auto; color:var(--ink2); font-size:16px; line-height:1.6;
+    opacity:0; animation:rise .9s .26s cubic-bezier(.2,.7,.2,1) forwards}
+  .priv{display:inline-flex; align-items:center; gap:7px; margin-top:20px; padding:7px 14px;
+    border:1px solid var(--hair); border-radius:999px; background:rgba(251,248,242,.6);
+    font-size:12px; color:var(--ink2); opacity:0; animation:rise .9s .34s cubic-bezier(.2,.7,.2,1) forwards}
+  .priv .dot{width:7px; height:7px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px rgba(63,143,91,.16)}
+
+  @keyframes rise{from{opacity:0; transform:translateY(16px)}to{opacity:1; transform:translateY(0)}}
+
+  /* ── Card ───────────────────────────────────────────────── */
+  .card{background:var(--bg2); border:1px solid var(--hair); border-radius:var(--r-xl);
+    box-shadow:var(--shadow); padding:30px}
+  .panel{margin:34px 0; opacity:0; animation:rise .9s .42s cubic-bezier(.2,.7,.2,1) forwards}
+
+  .sectlabel{font-size:10px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--accent); margin-bottom:6px}
+  .secttitle{font-family:var(--serif); font-size:24px; font-weight:500; letter-spacing:-.2px}
+
+  /* ── Form grid ──────────────────────────────────────────── */
+  .grid{display:grid; grid-template-columns:repeat(2,1fr); gap:18px 22px; margin-top:24px}
+  .field-full{grid-column:1 / -1}
+  label.lab{display:block; font-size:10px; font-weight:600; letter-spacing:1.3px;
+    text-transform:uppercase; color:var(--ink2); margin-bottom:8px}
+  .inputwrap{position:relative}
+  .pre{position:absolute; left:14px; top:50%; transform:translateY(-50%); color:var(--ink3);
+    font-family:var(--serif); font-size:18px; pointer-events:none}
+  input[type=number]{width:100%; height:52px; padding:0 14px 0 32px; border:1px solid var(--hair);
+    border-radius:var(--r-md); background:var(--field); font-family:var(--serif); font-size:19px;
+    color:var(--ink); outline:none; transition:border-color .2s, box-shadow .2s; -moz-appearance:textfield}
+  input.nopre{padding-left:14px}
+  input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+  input[type=number]:focus{border-color:var(--accent); box-shadow:0 0 0 3px var(--accentSoft)}
+  .hint{font-size:11px; color:var(--ink3); margin-top:6px}
+
+  /* segmented */
+  .seg{display:inline-flex; padding:4px; background:var(--hair2); border-radius:var(--r-md); gap:3px}
+  .seg button{appearance:none; border:0; background:transparent; cursor:pointer; font-family:var(--sans);
+    font-size:13px; font-weight:500; color:var(--ink2); padding:10px 18px; border-radius:7px;
+    transition:all .22s cubic-bezier(.2,.7,.2,1)}
+  .seg button[aria-pressed=true]{background:var(--bg2); color:var(--ink); box-shadow:var(--shadow)}
+
+  /* slider */
+  .sliderrow{display:flex; align-items:center; gap:16px}
+  input[type=range]{-webkit-appearance:none; appearance:none; height:4px; border-radius:999px; flex:1;
+    background:linear-gradient(90deg,var(--accent) var(--fill,40%), var(--hair) var(--fill,40%)); outline:none}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:22px; height:22px; border-radius:50%;
+    background:var(--bg2); border:2px solid var(--accent); cursor:pointer; box-shadow:var(--shadow); transition:transform .15s}
+  input[type=range]::-webkit-slider-thumb:active{transform:scale(1.15)}
+  input[type=range]::-moz-range-thumb{width:20px; height:20px; border-radius:50%; background:var(--bg2);
+    border:2px solid var(--accent); cursor:pointer}
+  .slidval{font-family:var(--serif); font-size:18px; min-width:54px; text-align:right; color:var(--accent)}
+
+  /* CTA button */
+  .calcbtn{margin-top:28px; width:100%; height:58px; border:0; border-radius:var(--r-md); cursor:pointer;
+    background:var(--ink); color:var(--bg2); font-family:var(--sans); font-size:15px; font-weight:600;
+    letter-spacing:.3px; display:inline-flex; align-items:center; justify-content:center; gap:10px;
+    transition:transform .18s cubic-bezier(.2,.7,.2,1), box-shadow .25s, background .2s}
+  .calcbtn:hover{transform:translateY(-2px); box-shadow:var(--shadow-lg); background:#171310}
+  .calcbtn:active{transform:translateY(0)}
+  .calcbtn .glyph{color:var(--accentTint)}
+
+  .err{color:var(--clay); font-size:12px; margin-top:12px; min-height:16px; text-align:center}
+
+  /* ── Results ────────────────────────────────────────────── */
+  #results{display:none}
+  #results.show{display:block}
+  .reveal{opacity:0; transform:translateY(22px); transition:opacity .8s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1)}
+  .reveal.in{opacity:1; transform:translateY(0)}
+
+  .heroStats{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:24px}
+  .stat{background:var(--bg2); border:1px solid var(--hair); border-radius:var(--r-lg); padding:24px; position:relative; overflow:hidden}
+  .stat.feature{background:linear-gradient(155deg,#2a2238,#191320); border-color:transparent; color:var(--bg2)}
+  .stat .lab2{font-size:10px; font-weight:600; letter-spacing:1.3px; text-transform:uppercase; color:var(--ink2); margin-bottom:12px}
+  .stat.feature .lab2{color:var(--accentTint)}
+  .stat .num{font-family:var(--serif); font-size:clamp(28px,4.4vw,40px); font-weight:500; line-height:1; letter-spacing:-.5px}
+  .stat .num small{font-size:.5em; color:var(--ink3); font-weight:400}
+  .stat.feature .num small{color:var(--accentTint)}
+  .stat .cap{font-size:12px; color:var(--ink2); margin-top:10px}
+  .stat.feature .cap{color:rgba(251,248,242,.7)}
+  .stat .spark{position:absolute; right:-6px; bottom:-6px; font-family:var(--serif); font-size:90px; color:var(--accentSoft); line-height:1; user-select:none}
+
+  /* chart card */
+  .chartcard{margin-top:22px; padding:28px}
+  .chart-head{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; margin-bottom:6px}
+  .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--ink2)}
+  .legend span{display:inline-flex; align-items:center; gap:6px}
+  .swatch{width:11px; height:11px; border-radius:3px; display:inline-block}
+  svg.chart{width:100%; height:auto; display:block; overflow:visible}
+  .axis{font-size:10px; fill:var(--ink3); font-family:var(--sans)}
+  .gridline{stroke:var(--hair); stroke-width:1}
+  .draw{stroke-dasharray:var(--len); stroke-dashoffset:var(--len); animation:drawline 1.6s .2s cubic-bezier(.4,0,.2,1) forwards}
+  @keyframes drawline{to{stroke-dashoffset:0}}
+
+  /* breakdown bars */
+  .bd{display:grid; gap:14px; margin-top:22px}
+  .bd-row{display:grid; grid-template-columns:90px 1fr 110px; align-items:center; gap:14px}
+  .bd-name{font-size:12px; font-weight:600; letter-spacing:.4px; color:var(--ink2)}
+  .bd-track{height:30px; background:var(--hair2); border-radius:7px; overflow:hidden}
+  .bd-fill{height:100%; width:0; border-radius:7px; transition:width 1.2s cubic-bezier(.2,.7,.2,1)}
+  .bd-val{font-family:var(--serif); font-size:17px; text-align:right; color:var(--ink)}
+
+  /* matrix */
+  .matrix-scroll{overflow-x:auto; margin-top:22px; border-radius:var(--r-md)}
+  table.matrix{width:100%; border-collapse:collapse; min-width:560px}
+  table.matrix th,table.matrix td{padding:14px 12px; text-align:right; border-bottom:1px solid var(--hair)}
+  table.matrix thead th{font-size:10px; font-weight:600; letter-spacing:1px; text-transform:uppercase; color:var(--ink2); text-align:right}
+  table.matrix thead th:first-child,table.matrix tbody th{text-align:left}
+  table.matrix tbody th{font-family:var(--sans); font-weight:600; font-size:13px; color:var(--ink)}
+  table.matrix tbody th small{display:block; font-weight:400; font-size:10.5px; color:var(--ink3); letter-spacing:0; text-transform:none; margin-top:2px}
+  table.matrix td{font-family:var(--serif); font-size:18px; color:var(--ink)}
+  table.matrix .col65{background:var(--accentSoft)}
+  table.matrix tr:last-child td,table.matrix tr:last-child th{border-bottom:0}
+
+  /* plan cards */
+  .plans{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:22px}
+  .plan{background:var(--bg2); border:1px solid var(--hair); border-radius:var(--r-lg); padding:24px; transition:transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, border-color .25s}
+  .plan:hover{transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:var(--accentTint)}
+  .plan h3{font-family:var(--serif); font-size:20px; font-weight:500; margin-bottom:4px}
+  .plan .tagline{font-size:11.5px; color:var(--ink2); min-height:32px; margin-bottom:16px}
+  .plan .big{font-family:var(--serif); font-size:34px; font-weight:500; letter-spacing:-.5px; line-height:1}
+  .plan .big small{font-size:.42em; color:var(--ink3)}
+  .plan .meta{font-size:11.5px; color:var(--ink2); margin-top:14px; padding-top:14px; border-top:1px solid var(--hair); line-height:1.6}
+  .plan .meta b{color:var(--ink); font-weight:600}
+  .badge{display:inline-block; font-size:9.5px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:4px 8px; border-radius:999px; background:var(--accentSoft); color:var(--accent); margin-bottom:14px}
+
+  /* control row for over-time chart */
+  .ctrlrow{display:flex; align-items:center; gap:12px; flex-wrap:wrap}
+  .ctrlrow .lab{margin:0}
+
+  /* comparison */
+  .cmp{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:22px}
+  .cmp-item{text-align:center; background:var(--bg2); border:1px solid var(--hair); border-radius:var(--r-lg); padding:22px}
+  .cmp-item .tier{font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent)}
+  .cmp-item .tname{font-family:var(--serif); font-size:15px; color:var(--ink2); margin:4px 0 14px}
+  .cmp-bar{height:120px; display:flex; align-items:flex-end; justify-content:center; margin-bottom:14px}
+  .cmp-col{width:46px; background:linear-gradient(180deg,var(--accent),#8a63a8); border-radius:7px 7px 0 0; height:0; transition:height 1.1s cubic-bezier(.2,.7,.2,1)}
+  .cmp-item .cv{font-family:var(--serif); font-size:24px; font-weight:500}
+  .cmp-item .cs{font-size:11px; color:var(--ink3); margin-top:4px}
+
+  /* CTA + disclaimer */
+  .ctaband{margin-top:34px; background:linear-gradient(155deg,#2a2238,#191320); color:var(--bg2);
+    border-radius:var(--r-xl); padding:38px; text-align:center}
+  .ctaband h2{font-family:var(--serif); font-weight:500; font-size:28px; margin-bottom:10px}
+  .ctaband h2 em{font-style:italic; color:var(--accentTint)}
+  .ctaband p{color:rgba(251,248,242,.72); max-width:480px; margin:0 auto 24px; font-size:14.5px}
+  .ctaband a.btn{display:inline-flex; align-items:center; gap:9px; background:var(--bg2); color:var(--ink);
+    text-decoration:none; font-weight:600; font-size:14.5px; padding:15px 30px; border-radius:var(--r-md);
+    transition:transform .18s, box-shadow .25s}
+  .ctaband a.btn:hover{transform:translateY(-2px); box-shadow:0 14px 40px -14px rgba(0,0,0,.6)}
+
+  .disclaimer{margin:30px 0 10px; font-size:11.5px; color:var(--ink3); line-height:1.7; text-align:left}
+  .disclaimer b{color:var(--ink2)}
+  footer{text-align:center; padding:30px 0 56px; color:var(--ink3); font-size:12px}
+  footer .mark{display:inline-grid; vertical-align:middle; margin-right:6px; width:22px; height:22px; font-size:11px}
+
+  /* responsive */
+  @media (max-width:760px){
+    .grid{grid-template-columns:1fr}
+    .heroStats{grid-template-columns:1fr}
+    .plans{grid-template-columns:1fr}
+    .cmp{grid-template-columns:1fr}
+    .card{padding:22px}
+    .bd-row{grid-template-columns:74px 1fr 92px; gap:10px}
+    header.mast{padding:46px 0 18px}
+  }
+</style>
+</head>
+<body>
+<div class="ambient" aria-hidden="true">
+  <div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+</div>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="brandrow">
+      <span class="mark">✦</span>
+      <span class="brandname">Tenuto <em>·</em> CPF&nbsp;Studio</span>
+    </div>
+    <div class="kicker">CPF LIFE Retirement Projection</div>
+    <h1>Your CPF, <em>composed</em> for retirement.</h1>
+    <p class="sub">Enter your numbers and see your projected CPF balances at 55 — and your expected CPF LIFE payouts across every plan and payout age.</p>
+    <div class="priv"><span class="dot"></span> Private &amp; transient — nothing leaves this page or survives a refresh.</div>
+  </header>
+
+  <!-- ── INPUT ─────────────────────────────────────────────── -->
+  <section class="panel">
+    <div class="card">
+      <div class="sectlabel">Step 01</div>
+      <div class="secttitle">Tell us where you stand today</div>
+
+      <div class="grid">
+        <div>
+          <label class="lab" for="age">Current age</label>
+          <div class="inputwrap"><input class="nopre" type="number" id="age" min="21" max="75" step="1" placeholder="35" /></div>
+          <div class="hint">Between 21 and 75.</div>
+        </div>
+
+        <div>
+          <label class="lab" for="salary">Monthly salary (gross)</label>
+          <div class="inputwrap"><span class="pre">$</span><input type="number" id="salary" min="0" max="60000" step="50" placeholder="6,000" /></div>
+          <div class="hint">CPF is capped at the first $8,000/month in 2026.</div>
+        </div>
+
+        <div class="field-full">
+          <label class="lab">Sex <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— CPF LIFE payouts differ slightly by sex</span></label>
+          <div class="seg" id="segSex" role="group" aria-label="Sex">
+            <button type="button" data-v="M" aria-pressed="true">Male</button>
+            <button type="button" data-v="F" aria-pressed="false">Female</button>
+          </div>
+        </div>
+
+        <div class="field-full">
+          <label class="lab" for="growth">Expected annual salary increase</label>
+          <div class="sliderrow">
+            <input type="range" id="growth" min="0" max="8" step="0.5" value="3" />
+            <span class="slidval" id="growthVal">3.0%</span>
+          </div>
+          <div class="hint">Applied each year until age 55. Set to 0% for a flat, conservative estimate.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:28px" class="sectlabel">Step 02</div>
+      <div class="secttitle">Your current CPF balances</div>
+      <div class="grid">
+        <div>
+          <label class="lab" for="oa">Ordinary Account (OA)</label>
+          <div class="inputwrap"><span class="pre">$</span><input type="number" id="oa" min="0" max="3000000" step="100" placeholder="40,000" /></div>
+        </div>
+        <div>
+          <label class="lab" for="sa">Special Account (SA)</label>
+          <div class="inputwrap"><span class="pre">$</span><input type="number" id="sa" min="0" max="3000000" step="100" placeholder="30,000" /></div>
+          <div class="hint">Closed once you turn 55 — folds into your RA.</div>
+        </div>
+        <div>
+          <label class="lab" for="ma">MediSave Account (MA)</label>
+          <div class="inputwrap"><span class="pre">$</span><input type="number" id="ma" min="0" max="3000000" step="100" placeholder="25,000" /></div>
+        </div>
+        <div>
+          <label class="lab" for="ra">Retirement Account (RA)</label>
+          <div class="inputwrap"><span class="pre">$</span><input type="number" id="ra" min="0" max="3000000" step="100" placeholder="0" /></div>
+          <div class="hint">Usually $0 before age 55.</div>
+        </div>
+      </div>
+
+      <button class="calcbtn" id="calcBtn"><span class="glyph">✦</span> Compose my projection</button>
+      <div class="err" id="err"></div>
+    </div>
+  </section>
+
+  <!-- ── RESULTS ───────────────────────────────────────────── -->
+  <section id="results">
+
+    <div class="panel reveal" id="r1">
+      <div class="sectlabel">Step 03 — Your outlook</div>
+      <div class="secttitle" id="outlookTitle">Where your CPF is headed</div>
+      <div class="heroStats">
+        <div class="stat">
+          <div class="lab2" id="s1lab">Total CPF at 55</div>
+          <div class="num"><small>$</small><span id="s1" data-target="0">0</span></div>
+          <div class="cap" id="s1cap">OA + MediSave + Retirement Account</div>
+          <div class="spark">✦</div>
+        </div>
+        <div class="stat">
+          <div class="lab2">RA at 65 · CPF LIFE premium</div>
+          <div class="num"><small>$</small><span id="s2" data-target="0">0</span></div>
+          <div class="cap">The capital that funds your lifelong payouts</div>
+          <div class="spark">✦</div>
+        </div>
+        <div class="stat feature">
+          <div class="lab2">Est. monthly payout from 65</div>
+          <div class="num"><small>$</small><span id="s3" data-target="0">0</span></div>
+          <div class="cap" id="s3cap">CPF LIFE Standard Plan</div>
+          <div class="spark" style="color:rgba(203,182,224,.14)">✦</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel reveal" id="r2">
+      <div class="card chartcard">
+        <div class="chart-head">
+          <div>
+            <div class="sectlabel">Accumulation</div>
+            <div class="secttitle">Your CPF balance, year by year</div>
+          </div>
+          <div class="legend">
+            <span><i class="swatch" style="background:#6F4A8E"></i> Total CPF</span>
+            <span><i class="swatch" style="background:#CBB6E0"></i> Retirement Account</span>
+          </div>
+        </div>
+        <div id="accChart"></div>
+      </div>
+    </div>
+
+    <div class="panel reveal" id="r3">
+      <div class="card">
+        <div class="sectlabel">Composition</div>
+        <div class="secttitle" id="bdTitle">How it splits at age 55</div>
+        <div class="bd" id="breakdown"></div>
+      </div>
+    </div>
+
+    <div class="panel reveal" id="r4">
+      <div class="sectlabel">Step 04 — The payouts</div>
+      <div class="secttitle">Three plans, your way</div>
+      <p style="color:var(--ink2);max-width:620px;margin-top:8px;font-size:14.5px">CPF LIFE gives you three plans. These are your estimated payouts if you start at 65, based on your projected Retirement Account.</p>
+      <div class="plans" id="planCards"></div>
+    </div>
+
+    <div class="panel reveal" id="r5">
+      <div class="card chartcard">
+        <div class="chart-head">
+          <div>
+            <div class="sectlabel">Every permutation</div>
+            <div class="secttitle">Payout over your lifetime</div>
+          </div>
+          <div class="ctrlrow">
+            <span class="lab" style="margin:0">Start payouts at</span>
+            <div class="seg" id="segAge" role="group" aria-label="Payout start age"></div>
+          </div>
+        </div>
+        <div class="legend" style="margin-bottom:8px">
+          <span><i class="swatch" style="background:#6F4A8E"></i> Standard</span>
+          <span><i class="swatch" style="background:#3F8F5B"></i> Escalating</span>
+          <span><i class="swatch" style="background:#9A3B32"></i> Basic</span>
+        </div>
+        <div id="lifeChart"></div>
+        <p style="color:var(--ink3);font-size:11.5px;margin-top:14px">The Escalating Plan starts lower but grows 2% every year — it typically overtakes the Standard Plan in your late 70s to early 80s.</p>
+      </div>
+    </div>
+
+    <div class="panel reveal" id="r6">
+      <div class="card">
+        <div class="sectlabel">Full matrix</div>
+        <div class="secttitle">Monthly payout by plan &amp; start age</div>
+        <div class="matrix-scroll">
+          <table class="matrix" id="matrix"></table>
+        </div>
+        <p style="color:var(--ink3);font-size:11.5px;margin-top:14px">Escalating figures show the <i>initial</i> monthly payout; it rises 2%/yr thereafter. Deferring each year past 65 adds roughly 7% to your payout.</p>
+      </div>
+    </div>
+
+    <div class="panel reveal" id="r7">
+      <div class="card">
+        <div class="sectlabel">For context</div>
+        <div class="secttitle">If you set aside each retirement sum</div>
+        <p style="color:var(--ink2);max-width:620px;margin-top:8px;font-size:14.5px">Standard Plan payout from 65 at the three benchmark sums for your cohort (projected to the year you turn 55).</p>
+        <div class="cmp" id="cmp"></div>
+      </div>
+    </div>
+
+    <div class="ctaband reveal" id="r8">
+      <h2>Want to make these numbers <em>bigger</em>?</h2>
+      <p>Top-ups, OA-to-RA transfers, and the right CPF LIFE plan can meaningfully lift your retirement income. Let's map your options together.</p>
+      <a class="btn" href="#" id="ctaLink"><span>✦</span> Book a consultation</a>
+    </div>
+
+    <div class="disclaimer">
+      <b>Important — please read.</b> This tool produces <b>illustrative estimates only</b> and is not financial advice, an offer, or a guarantee of any payout. Figures use 2026 CPF parameters (contribution &amp; allocation rates, $8,000 monthly wage ceiling, 2.5% OA / 4% SMRA interest with extra-interest tiers, BRS $110,200 · FRS $220,400 · ERS $440,800) and assume contributions continue to age 55, after which balances grow at CPF interest with no further contributions or withdrawals. CPF LIFE payouts are modelled from CPF Board's published Standard-Plan estimates (male basis, ~7% female adjustment) and interpolated; Basic and Escalating figures are approximations. Actual CPF rules, interest rates, retirement sums, and payouts are set by the CPF Board and change over time. Verify any figure with the official <a href="https://www.cpf.gov.sg" target="_blank" rel="noopener" style="color:var(--accent)">CPF LIFE Estimator</a> and a licensed adviser before acting.
+    </div>
+  </section>
+
+  <footer>
+    <span class="mark">✦</span> Tenuto — relationships, on tempo. &nbsp;·&nbsp; Built for illustration. Not affiliated with the CPF Board.
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   CPF + CPF LIFE projection engine  (2026 parameters)
+   Sources: CPF Board allocation/contribution rates 2026, interest
+   rate floors, retirement sums (BRS/FRS/ERS 2026), and CPF Board
+   published CPF LIFE Standard-Plan payout estimates.
+   ═══════════════════════════════════════════════════════════════ */
+const Y0 = 2026;
+const CEIL = 8000;            // monthly Ordinary Wage ceiling 2026
+const BHS  = 75500;           // Basic Healthcare Sum 2026 (MA cap)
+const RS   = { BRS:110200, FRS:220400, ERS:440800 }; // turning 55 in 2026
+const RS_G = 0.035;           // retirement sums grow ~3.5%/yr
+const FEMALE_ADJ = 0.93;      // CPF LIFE female payout ≈ 7% lower
+const DEFER = 0.07;           // ≈ +7% payout per year deferred past 65
+const ESC_INIT = 0.79;        // Escalating initial ≈ 79% of Standard
+const ESC_GROW = 0.02;        // Escalating grows 2%/yr
+const BASIC_INIT = 0.95;      // Basic initial ≈ 95% of Standard
+
+// Allocation rates 2026 — fraction of (capped) wage to each account.
+const ALLOC = [
+  {max:35, oa:.23,  sa:.06,  ma:.08 },
+  {max:45, oa:.21,  sa:.07,  ma:.09 },
+  {max:50, oa:.19,  sa:.08,  ma:.10 },
+  {max:55, oa:.15,  sa:.115, ma:.105},
+  {max:60, oa:.12,  ra:.115, ma:.105},
+  {max:65, oa:.035, ra:.11,  ma:.105},
+  {max:70, oa:.01,  ra:.05,  ma:.105},
+  {max:200,oa:.01,  ra:.01,  ma:.105},
+];
+const band = a => ALLOC.find(b => a <= b.max);
+
+// Official CPF LIFE reference tables (2026 basis, Standard Plan, male).
+//   SP : savings set aside at 55  →  CPF LIFE premium at 65
+//   P65: premium at 65            →  monthly payout from 65
+// Linear interpolation between these published anchors reproduces CPF's
+// own figures exactly at BRS/FRS/ERS.
+const SP  = [[50000,82400],[110200,170200],[150000,227900],[220400,330100],[300000,445600],[440800,650100]];
+const P65 = [[82400,490],[170200,950],[227900,1250],[330100,1780],[445600,2380],[650100,3440]];
+function interp(t,x){
+  if (x<=t[0][0]){ const[a,va]=t[0],[b,vb]=t[1]; return Math.max(0, va+(vb-va)/(b-a)*(x-a)); }
+  for (let i=0;i<t.length-1;i++){ const[a,va]=t[i],[b,vb]=t[i+1]; if(x<=b) return va+(vb-va)/(b-a)*(x-a); }
+  const n=t.length,[a,va]=t[n-2],[b,vb]=t[n-1]; return vb+(vb-va)/(b-a)*(x-b);
+}
+// RA at 65 (the CPF LIFE premium) from a Retirement Account balance held at `age`.
+function premium65From(ra, age){
+  if (ra<=0) return 0;
+  if (age>=65) return ra;
+  if (age<=55) return interp(SP, ra);
+  const fullRatio = interp(SP, ra)/ra;            // implied 10-yr growth at this balance
+  return ra*Math.pow(fullRatio, (65-age)/10);
+}
+
+function project(inp){
+  let {age, salary, growth, oa, sa, ma, ra} = inp;
+  let OA=oa, SA=sa, MA=ma, RA=ra, sal=salary;
+  const accumulated = age < 55;
+  const series=[{age, OA, SA, MA, RA, total:OA+SA+MA+RA}];
+
+  // Phase 1 — accumulate to 55
+  if (age < 55){
+    for (let a=age; a<55; a++){
+      const wage = Math.min(sal, CEIL) * 12;
+      const bd = band(a);
+      OA += wage*bd.oa; SA += wage*(bd.sa||0); MA += wage*bd.ma;
+      if (MA > BHS){ SA += (MA-BHS); MA = BHS; }          // MA overflow → SA pre-55
+      const comb = Math.min(OA,20000) + SA + MA;          // extra interest base (pre-55)
+      const extra = 0.01*Math.min(60000, comb);
+      OA*=1.025; SA*=1.04; MA*=1.04; SA += extra;
+      sal *= (1+growth);
+      series.push({age:a+1, OA, SA, MA, RA, total:OA+SA+MA+RA});
+    }
+    // Form RA at 55 — SA then OA up to the cohort's FRS
+    const yrsTo55 = 55 - age;
+    const frs55 = RS.FRS * Math.pow(1+RS_G, yrsTo55);
+    let need = frs55;
+    let m = Math.min(SA, need); RA+=m; SA-=m; need-=m;
+    if (need>0){ const m2=Math.min(OA,need); RA+=m2; OA-=m2; need-=m2; }
+    OA += SA; SA = 0;                                      // SA closes at 55
+    series[series.length-1] = {age:55, OA, SA:0, MA, RA, total:OA+MA+RA};
+  }
+
+  // Snapshot at "retirement" (age 55, or now if already older)
+  const baseAge = Math.max(age, 55);
+  const snap = { age:baseAge, OA, MA, RA, total:OA+MA+RA };
+
+  // Phase 2 — RA at 65 (CPF LIFE premium) + balances grown to 65 for display
+  const RA65 = premium65From(RA, baseAge);
+  const yrsTo65 = Math.max(0, 65 - baseAge);
+  let OA65 = OA*Math.pow(1.025, yrsTo65);
+  let MA65 = MA*Math.pow(1.04,  yrsTo65);
+  // extend the series to 65 for the chart (only when RA already exists, i.e. age>=55)
+  if (!accumulated && baseAge < 65 && RA > 0){
+    const annual = Math.pow(RA65/RA, 1/yrsTo65);
+    let rr=RA, oo=OA, mm=MA;
+    for (let a=baseAge; a<65; a++){ rr*=annual; oo*=1.025; mm*=1.04;
+      series.push({age:a+1, OA:oo, SA:0, MA:mm, RA:rr, total:oo+mm+rr}); }
+  }
+
+  // Phase 3 — payouts. Earliest start = max(65, current age).
+  const earliest = Math.max(65, age);
+  const ages = []; for(let a=earliest; a<=70; a++) ages.push(a);
+  const g = inp.sex==='F' ? FEMALE_ADJ : 1;
+  const base65 = interp(P65, RA65) * g;     // Standard payout if started at 65
+
+  const payoutAt = (a) => base65 * (1 + DEFER*(a-65));
+  const plans = ages.map(a => {
+    const std = payoutAt(a);
+    return { age:a, Standard:std, Basic:std*BASIC_INIT, Escalating:std*ESC_INIT };
+  });
+
+  // Benchmark comparison (cohort BRS/FRS/ERS set aside at 55 → payout @65)
+  const yrsTo55 = Math.max(0, 55-age);
+  const f = Math.pow(1+RS_G, yrsTo55);
+  const bench = ['BRS','FRS','ERS'].map(k => {
+    const at55 = RS[k]*f;
+    const at65 = interp(SP, at55);
+    return { tier:k, at55, payout: interp(P65, at65)*g };
+  });
+
+  return { snap, RA65, OA65, MA65, total65:OA65+MA65+RA65, base65, ages, plans, bench, series, sex:inp.sex, age };
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UI
+   ═══════════════════════════════════════════════════════════════ */
+const $ = s => document.querySelector(s);
+const fmt = n => Math.round(n).toLocaleString('en-SG');
+let SEX='M', START=65, MODEL=null;
+
+// segmented: sex
+$('#segSex').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b));
+  SEX=b.dataset.v;
+});
+// slider
+const gr=$('#growth'), grv=$('#growthVal');
+const setGr=()=>{ grv.textContent=parseFloat(gr.value).toFixed(1)+'%'; gr.style.setProperty('--fill',(gr.value/8*100)+'%'); };
+gr.addEventListener('input',setGr); setGr();
+
+$('#calcBtn').addEventListener('click', run);
+[...document.querySelectorAll('input')].forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') run(); }));
+
+function num(id){ const v=parseFloat($('#'+id).value); return isNaN(v)?null:v; }
+
+function run(){
+  const err=$('#err'); err.textContent='';
+  const age=num('age'), salary=num('salary');
+  const oa=num('oa')||0, sa=num('sa')||0, ma=num('ma')||0, ra=num('ra')||0;
+  if(age===null||age<21||age>75){ err.textContent='Please enter an age between 21 and 75.'; return; }
+  if(salary===null||salary<0){ err.textContent='Please enter your monthly salary.'; return; }
+  const growth=parseFloat(gr.value)/100;
+
+  MODEL = project({age, salary, growth, sex:SEX, oa, sa, ma, ra});
+  START = MODEL.ages[0];
+  render(MODEL);
+
+  const res=$('#results'); res.classList.add('show');
+  // staged reveal
+  const panels=['#r1','#r2','#r3','#r4','#r5','#r6','#r7','#r8'];
+  requestAnimationFrame(()=>{
+    panels.forEach((p,i)=> setTimeout(()=>$(p).classList.add('in'), 80*i));
+    const r1=$('#r1'); if(r1.scrollIntoView) r1.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+}
+
+function render(m){
+  const olderNow = m.age>=55;
+  $('#s1lab').textContent = olderNow? 'Total CPF today' : 'Total CPF at 55';
+  $('#outlookTitle').textContent = olderNow? 'Where your CPF stands' : 'Where your CPF is headed';
+  $('#bdTitle').textContent = olderNow? 'How it splits today' : 'How it splits at age 55';
+  $('#s1cap').textContent = 'OA + MediSave' + (m.snap.RA>0?' + Retirement Account':'');
+
+  countUp($('#s1'), m.snap.total);
+  countUp($('#s2'), m.RA65);
+  countUp($('#s3'), m.plans[0].Standard);
+  $('#s3cap').textContent = `CPF LIFE Standard Plan${m.age>=65?'':' · from age 65'} · ${m.sex==='F'?'female':'male'} basis`;
+
+  // Accumulation chart only makes sense when there's a path to plot.
+  if (m.series.length > 1){ $('#r2').style.display=''; drawAccChart(m.series); }
+  else { $('#r2').style.display='none'; }
+  drawBreakdown(m.snap);
+  drawPlanCards(m);
+  buildAgeSeg(m);
+  drawLifeChart(m);
+  buildMatrix(m);
+  drawCmp(m);
+}
+
+/* count-up animation */
+function countUp(el, target){
+  const dur=1100, t0=performance.now();
+  const ease=t=>1-Math.pow(1-t,3);
+  function step(now){
+    const k=Math.min(1,(now-t0)/dur);
+    el.textContent=fmt(target*ease(k));
+    if(k<1) requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* ── accumulation chart (total + RA) ── */
+function drawAccChart(series){
+  const W=920,H=300,pad={l:54,r:18,t:18,b:34};
+  const xs=series.map(d=>d.age), maxT=Math.max(...series.map(d=>d.total),1);
+  const x=a=>pad.l+(a-xs[0])/(xs[xs.length-1]-xs[0]||1)*(W-pad.l-pad.r);
+  const y=v=>H-pad.b-(v/maxT)*(H-pad.t-pad.b);
+  const line=(key)=>series.map((d,i)=>(i?'L':'M')+x(d.age).toFixed(1)+' '+y(d[key]).toFixed(1)).join(' ');
+  const area=line('total')+` L ${x(xs[xs.length-1])} ${H-pad.b} L ${x(xs[0])} ${H-pad.b} Z`;
+  // gridlines
+  let grid='';
+  for(let i=0;i<=4;i++){ const v=maxT*i/4, yy=y(v);
+    grid+=`<line class="gridline" x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}"/>`+
+          `<text class="axis" x="${pad.l-8}" y="${yy+3}" text-anchor="end">$${fmt(v/1000)}k</text>`; }
+  let xlab='';
+  const step=Math.max(1,Math.round((xs.length-1)/6));
+  for(let i=0;i<xs.length;i+=step){ xlab+=`<text class="axis" x="${x(xs[i])}" y="${H-10}" text-anchor="middle">${xs[i]}</text>`; }
+  const lenT=2600,lenR=2600;
+  $('#accChart').innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+    <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#6F4A8E" stop-opacity=".22"/><stop offset="1" stop-color="#6F4A8E" stop-opacity="0"/>
+    </linearGradient></defs>
+    ${grid}${xlab}
+    <path d="${area}" fill="url(#ag)"/>
+    <path d="${line('total')}" fill="none" stroke="#6F4A8E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="draw" style="--len:${lenT}"/>
+    <path d="${line('RA')}" fill="none" stroke="#CBB6E0" stroke-width="2.5" stroke-dasharray="2600" stroke-linecap="round" stroke-linejoin="round" class="draw" style="--len:${lenR}"/>
+  </svg>`;
+}
+
+/* ── breakdown bars ── */
+function drawBreakdown(s){
+  const rows=[['OA','Ordinary',s.OA,'#A9A093'],['MA','MediSave',s.MA,'#CBB6E0'],['RA','Retirement',s.RA,'#6F4A8E']]
+    .filter(r=>r[2]>0.5);
+  const max=Math.max(...rows.map(r=>r[2]),1);
+  $('#breakdown').innerHTML=rows.map(r=>`
+    <div class="bd-row">
+      <span class="bd-name">${r[1]}</span>
+      <div class="bd-track"><div class="bd-fill" data-w="${(r[2]/max*100)}" style="background:${r[3]}"></div></div>
+      <span class="bd-val">$${fmt(r[2])}</span>
+    </div>`).join('');
+  // animate widths after paint
+  requestAnimationFrame(()=>setTimeout(()=>{
+    document.querySelectorAll('#breakdown .bd-fill').forEach(f=>f.style.width=f.dataset.w+'%');
+  },120));
+}
+
+/* ── plan cards (start at 65) ── */
+function drawPlanCards(m){
+  const p=m.plans[0], a0=p.age;
+  const months=(90-a0)*12;
+  const totStd=p.Standard*months;
+  const totBasic=p.Basic*months;
+  let totEsc=0,e=p.Escalating; for(let yr=a0; yr<90; yr++){ totEsc+=e*12; e*=(1+ESC_GROW); }
+  const cards=[
+    {n:'Standard', badge:'Most popular', tl:'Steady payouts for life — the default plan.',
+      v:p.Standard, meta:`Level for life. Est. total to 90: <b>$${fmt(totStd)}</b>.`},
+    {n:'Escalating', badge:'Inflation hedge', tl:'Starts lower, rises 2% every year.',
+      v:p.Escalating, meta:`Grows yearly; overtakes Standard ~age 80. Est. total to 90: <b>$${fmt(totEsc)}</b>.`},
+    {n:'Basic', badge:'Larger legacy', tl:'Lower payouts, more left for loved ones.',
+      v:p.Basic, meta:`Bigger bequest to family. Est. total to 90: <b>$${fmt(totBasic)}</b>.`},
+  ];
+  $('#planCards').innerHTML=cards.map(c=>`
+    <div class="plan">
+      <span class="badge">${c.badge}</span>
+      <h3>${c.n}</h3>
+      <div class="tagline">${c.tl}</div>
+      <div class="big"><small>$</small>${fmt(c.v)}<small> /mo</small></div>
+      <div class="meta">${c.meta}</div>
+    </div>`).join('');
+}
+
+/* ── payout start-age segmented ── */
+function buildAgeSeg(m){
+  $('#segAge').innerHTML=m.ages.map((a,i)=>`<button type="button" data-a="${a}" aria-pressed="${i===0}">${a}</button>`).join('');
+  $('#segAge').onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
+    [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed',x===b));
+    START=+b.dataset.a; drawLifeChart(m); };
+}
+
+/* ── lifetime payout chart for chosen start age ── */
+function drawLifeChart(m){
+  const p=m.plans.find(x=>x.age===START)||m.plans[0];
+  const a0=p.age, aEnd=95;
+  const std=p.Standard, basic=p.Basic;
+  const escSeries=[]; let e=p.Escalating;
+  for(let a=a0;a<=aEnd;a++){ escSeries.push({a, v:e}); e*=(1+ESC_GROW); }
+  const maxV=Math.max(std, basic, escSeries[escSeries.length-1].v)*1.08;
+  const W=920,H=300,pad={l:54,r:18,t:18,b:34};
+  const x=a=>pad.l+(a-a0)/(aEnd-a0)*(W-pad.l-pad.r);
+  const y=v=>H-pad.b-(v/maxV)*(H-pad.t-pad.b);
+  let grid='';
+  for(let i=0;i<=4;i++){ const v=maxV*i/4, yy=y(v);
+    grid+=`<line class="gridline" x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}"/>`+
+          `<text class="axis" x="${pad.l-8}" y="${yy+3}" text-anchor="end">$${fmt(v)}</text>`; }
+  let xlab=''; for(let a=a0;a<=aEnd;a+=5){ xlab+=`<text class="axis" x="${x(a)}" y="${H-10}" text-anchor="middle">${a}</text>`; }
+  const flat=v=>`M ${x(a0)} ${y(v)} L ${x(aEnd)} ${y(v)}`;
+  const escPath=escSeries.map((d,i)=>(i?'L':'M')+x(d.a).toFixed(1)+' '+y(d.v).toFixed(1)).join(' ');
+  $('#lifeChart').innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+    ${grid}${xlab}
+    <path d="${flat(basic)}" fill="none" stroke="#9A3B32" stroke-width="2.5" stroke-dasharray="6 5" class="draw" style="--len:1000" stroke-linecap="round"/>
+    <path d="${flat(std)}" fill="none" stroke="#6F4A8E" stroke-width="3" class="draw" style="--len:1000" stroke-linecap="round"/>
+    <path d="${escPath}" fill="none" stroke="#3F8F5B" stroke-width="3" class="draw" style="--len:1400" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+/* ── full matrix ── */
+function buildMatrix(m){
+  const head=`<thead><tr><th>Plan</th>${m.ages.map(a=>`<th class="${a===65?'col65':''}">Age ${a}</th>`).join('')}</tr></thead>`;
+  const rowDefs=[['Standard','level for life'],['Escalating','initial · +2%/yr'],['Basic','lower · bigger legacy']];
+  const body='<tbody>'+rowDefs.map(([k,sub])=>`<tr>
+      <th>${k}<small>${sub}</small></th>
+      ${m.plans.map(p=>`<td class="${p.age===65?'col65':''}">$${fmt(p[k])}</td>`).join('')}
+    </tr>`).join('')+'</tbody>';
+  $('#matrix').innerHTML=head+body;
+}
+
+/* ── benchmark comparison bars ── */
+function drawCmp(m){
+  const max=Math.max(...m.bench.map(b=>b.payout),1);
+  const names={BRS:'Basic Retirement Sum',FRS:'Full Retirement Sum',ERS:'Enhanced Retirement Sum'};
+  $('#cmp').innerHTML=m.bench.map(b=>`
+    <div class="cmp-item">
+      <div class="tier">${b.tier}</div>
+      <div class="tname">${names[b.tier]}</div>
+      <div class="cmp-bar"><div class="cmp-col" data-h="${(b.payout/max*100)}"></div></div>
+      <div class="cv">$${fmt(b.payout)}<span style="font-size:.55em;color:var(--ink3)"> /mo</span></div>
+      <div class="cs">set aside $${fmt(b.at55)} at 55</div>
+    </div>`).join('');
+  requestAnimationFrame(()=>setTimeout(()=>{
+    document.querySelectorAll('#cmp .cmp-col').forEach(c=>c.style.height=c.dataset.h+'%');
+  },140));
+}
+</script>
+</body>
+</html>
