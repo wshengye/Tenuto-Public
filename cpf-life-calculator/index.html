@@ -138,6 +138,10 @@
   .stat .cap{font-size:12px; color:var(--ink2); margin-top:10px}
   .stat.feature .cap{color:rgba(251,248,242,.7)}
   .stat .spark{position:absolute; right:-6px; bottom:-6px; font-family:var(--serif); font-size:90px; color:var(--accentSoft); line-height:1; user-select:none}
+  .todaynote{display:inline-block; margin-top:10px; font-size:11.5px; font-weight:600; letter-spacing:.2px;
+    color:var(--accentTint); background:rgba(203,182,224,.14); padding:4px 10px; border-radius:999px}
+  .todayline{font-size:11.5px; color:var(--accent); margin-top:6px; font-weight:600}
+  .todayline span{color:var(--ink3); font-weight:400}
 
   /* chart card */
   .chartcard{margin-top:22px; padding:28px}
@@ -145,10 +149,23 @@
   .legend{display:flex; gap:16px; flex-wrap:wrap; font-size:12px; color:var(--ink2)}
   .legend span{display:inline-flex; align-items:center; gap:6px}
   .swatch{width:11px; height:11px; border-radius:3px; display:inline-block}
-  svg.chart{width:100%; height:auto; display:block; overflow:visible}
-  .axis{font-size:10px; fill:var(--ink3); font-family:var(--sans)}
+  #accChart,#lifeChart{position:relative}
+  svg.chart{width:100%; height:auto; display:block; overflow:visible; touch-action:pan-y}
+  .axis{fill:var(--ink3); font-family:var(--sans)}
   .gridline{stroke:var(--hair); stroke-width:1}
   .draw{stroke-dasharray:var(--len); stroke-dashoffset:var(--len); animation:drawline 1.6s .2s cubic-bezier(.4,0,.2,1) forwards}
+  /* hover / touch readout */
+  .hit{fill:transparent}
+  .cursor{stroke:var(--ink3); stroke-width:1; stroke-dasharray:3 3; opacity:0; transition:opacity .12s; pointer-events:none}
+  .hmark{opacity:0; transition:opacity .12s; pointer-events:none}
+  .tip{position:absolute; top:2px; transform:translateX(-50%); pointer-events:none; opacity:0; transition:opacity .12s;
+    background:var(--ink); color:var(--bg2); border-radius:9px; padding:9px 12px; min-width:128px; z-index:6;
+    box-shadow:var(--shadow-lg); white-space:nowrap}
+  .tip .tt-h{font-family:var(--serif); font-size:13.5px; margin-bottom:6px; color:var(--accentTint)}
+  .tip .tt-r{display:flex; justify-content:space-between; gap:18px; font-size:11.5px; line-height:1.75}
+  .tip .tt-r span{display:inline-flex; align-items:center; gap:6px; color:rgba(251,248,242,.82)}
+  .tip .tt-r i{width:8px; height:8px; border-radius:2px; display:inline-block; flex:none}
+  .tip .tt-r b{font-weight:600}
   @keyframes drawline{to{stroke-dashoffset:0}}
 
   /* breakdown bars */
@@ -174,7 +191,10 @@
   /* plan cards */
   .plans{display:grid; grid-template-columns:repeat(3,1fr); gap:18px; margin-top:22px}
   .plan{background:var(--bg2); border:1px solid var(--hair); border-radius:var(--r-lg); padding:24px; transition:transform .25s cubic-bezier(.2,.7,.2,1), box-shadow .25s, border-color .25s}
+  .plan{cursor:pointer}
   .plan:hover{transform:translateY(-4px); box-shadow:var(--shadow-lg); border-color:var(--accentTint)}
+  .plan.on{border-color:var(--accent); box-shadow:var(--shadow-lg)}
+  .plan.on .badge{background:var(--accent); color:var(--onTint)}
   .plan h3{font-family:var(--serif); font-size:20px; font-weight:500; margin-bottom:4px}
   .plan .tagline{font-size:11.5px; color:var(--ink2); min-height:32px; margin-bottom:16px}
   .plan .big{font-family:var(--serif); font-size:34px; font-weight:500; letter-spacing:-.5px; line-height:1}
@@ -213,15 +233,99 @@
   footer{text-align:center; padding:30px 0 56px; color:var(--ink3); font-size:12px}
   footer .mark{display:inline-grid; vertical-align:middle; margin-right:6px; width:22px; height:22px; font-size:11px}
 
+  /* assumptions note under the form */
+  .assume{margin-top:18px; display:flex; gap:9px; align-items:flex-start; font-size:12px; color:var(--ink2);
+    background:var(--accentSoft); border:1px solid var(--hair); border-radius:var(--r-md); padding:12px 14px; line-height:1.55}
+  .assume span{color:var(--accent); font-family:var(--serif)}
+  .assume b{color:var(--ink); font-weight:600}
+
+  /* age-55 education + RA formation */
+  .edu{background:var(--bg2); border:1px solid var(--hair); border-radius:var(--r-xl); box-shadow:var(--shadow); padding:30px}
+  .edu p.lead{color:var(--ink2); font-size:14.5px; line-height:1.65; max-width:660px; margin-top:6px}
+  .edu p.lead b{color:var(--ink); font-weight:600}
+  .preStats{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:22px}
+  .preStat{background:var(--bg); border:1px solid var(--hair); border-radius:var(--r-md); padding:14px}
+  .preStat .k{font-size:9.5px; font-weight:600; letter-spacing:1.1px; text-transform:uppercase; color:var(--ink2)}
+  .preStat .v{font-family:var(--serif); font-size:21px; margin-top:6px}
+  .preStat.tot{background:var(--ink); border-color:transparent}
+  .preStat.tot .k{color:var(--accentTint)} .preStat.tot .v{color:var(--bg2)}
+
+  .flow{margin-top:26px; display:grid; gap:12px}
+  .flowlabel{font-size:10px; font-weight:600; letter-spacing:1.3px; text-transform:uppercase; color:var(--accent); margin-bottom:2px}
+  .fnode{display:flex; align-items:center; gap:14px; padding:16px 18px; border-radius:var(--r-md); border:1px solid var(--hair); background:var(--bg)}
+  .fnode .ic{width:34px; height:34px; border-radius:9px; display:grid; place-items:center; font-family:var(--serif); font-size:15px; color:var(--bg2); flex:none}
+  .fnode .ftxt{flex:1; min-width:0}
+  .fnode .ft{font-size:13px; font-weight:600}
+  .fnode .fs{font-size:11.5px; color:var(--ink2); margin-top:2px}
+  .fnode .fv{font-family:var(--serif); font-size:19px; white-space:nowrap}
+  .fnode.ra{background:linear-gradient(155deg,#2a2238,#191320); border-color:transparent; color:var(--bg2)}
+  .fnode.ra .ft{color:var(--bg2)} .fnode.ra .fs{color:rgba(251,248,242,.7)} .fnode.ra .fv{color:var(--accentTint)}
+  .farrow{justify-self:center; color:var(--ink3); font-size:18px; line-height:1; margin:-6px 0}
+
+  .opts{margin-top:26px; display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+  .opt{display:flex; gap:11px; align-items:flex-start; padding:14px 16px; border:1px solid var(--hair); border-radius:var(--r-md); background:var(--bg)}
+  .opt .b{width:24px;height:24px;border-radius:50%;background:var(--accentSoft);color:var(--accent);display:grid;place-items:center;font-family:var(--serif);font-size:13px;flex:none}
+  .opt .ot{font-size:12.5px; line-height:1.5}
+  .opt .ot b{font-weight:600}
+
+  /* retirement-sum selector (stage 1) */
+  .sumsel{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:20px}
+  .sumtile{cursor:pointer; text-align:left; font-family:inherit; color:inherit; width:100%; background:var(--bg2); border:1.5px solid var(--hair); border-radius:var(--r-lg); padding:18px; transition:transform .2s cubic-bezier(.2,.7,.2,1), border-color .2s, background .2s}
+  .sumtile:hover{border-color:var(--accentTint); transform:translateY(-2px)}
+  .sumtile.on{border-color:var(--accent); background:var(--accentSoft); box-shadow:var(--shadow)}
+  .sumtile .tk{font-size:10px; font-weight:600; letter-spacing:1.2px; text-transform:uppercase; color:var(--accent)}
+  .sumtile .tn{font-size:12px; color:var(--ink2); margin:3px 0 10px}
+  .sumtile .tv{font-family:var(--serif); font-size:23px; font-weight:500; letter-spacing:-.3px}
+  .sumtile .tnote{font-size:11px; color:var(--ink3); margin-top:8px; line-height:1.45}
+  .sumtile.on .tnote{color:var(--ink2)}
+  /* keep / withdraw / medisave outcome */
+  .outcome{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:16px}
+  .ocard{border:1px solid var(--hair); border-radius:var(--r-md); padding:18px; background:var(--bg)}
+  .ocard.keep{background:linear-gradient(155deg,#2a2238,#191320); border-color:transparent; color:var(--bg2)}
+  .ocard .ol{font-size:10px; font-weight:600; letter-spacing:1.1px; text-transform:uppercase; color:var(--ink2)}
+  .ocard.keep .ol{color:var(--accentTint)}
+  .ocard .ov{font-family:var(--serif); font-size:25px; font-weight:500; margin-top:8px; letter-spacing:-.4px}
+  .ocard .od{font-size:11.5px; color:var(--ink2); margin-top:8px; line-height:1.5}
+  .ocard.keep .od{color:rgba(251,248,242,.72)}
+  .conds{margin-top:14px; display:grid; gap:8px}
+  .cond{display:flex; gap:9px; align-items:flex-start; font-size:12px; color:var(--ink2); line-height:1.5}
+  .cond span{color:var(--accent); font-family:var(--serif); flex:none}
+  .cond.warn span{color:var(--clay)}
+  /* stage-2 payout controls */
+  .paycontrols{display:flex; gap:22px; flex-wrap:wrap; align-items:flex-start; margin-top:18px}
+  .cgrp{display:flex; flex-direction:column; gap:8px}
+
   /* responsive */
   @media (max-width:760px){
+    .wrap{padding:0 16px}
     .grid{grid-template-columns:1fr}
     .heroStats{grid-template-columns:1fr}
     .plans{grid-template-columns:1fr}
     .cmp{grid-template-columns:1fr}
-    .card{padding:22px}
-    .bd-row{grid-template-columns:74px 1fr 92px; gap:10px}
-    header.mast{padding:46px 0 18px}
+    .card{padding:20px}
+    .chartcard{padding:18px}
+    .bd-row{grid-template-columns:66px 1fr 86px; gap:10px}
+    header.mast{padding:42px 0 16px}
+    .ctaband{padding:30px 22px}
+    .chart-head{gap:8px}
+    .seg button{padding:9px 13px; font-size:12.5px}
+    #segAge{flex-wrap:wrap}
+    .secttitle{font-size:21px}
+    .legend{font-size:11.5px; gap:12px}
+    .edu{padding:20px}
+    .preStats{grid-template-columns:repeat(2,1fr)}
+    .opts{grid-template-columns:1fr}
+    .sumsel{grid-template-columns:1fr}
+    .outcome{grid-template-columns:1fr}
+  }
+  @media (max-width:430px){
+    .wrap{padding:0 13px}
+    .stat{padding:20px}
+    .plan{padding:20px}
+    .cmp-item{padding:18px}
+    .seg button{padding:8px 11px; font-size:12px}
+    .priv{font-size:11px}
+    h1{font-size:32px}
   }
 </style>
 </head>
@@ -249,6 +353,14 @@
       <div class="secttitle">Tell us where you stand today</div>
 
       <div class="grid">
+        <div class="field-full">
+          <label class="lab">Employment type <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— this changes what CPF you must contribute</span></label>
+          <div class="seg" id="segEmp" role="group" aria-label="Employment type">
+            <button type="button" data-v="salaried" aria-pressed="true">Salaried employee</button>
+            <button type="button" data-v="sep" aria-pressed="false">Self-employed</button>
+          </div>
+        </div>
+
         <div>
           <label class="lab" for="age">Current age</label>
           <div class="inputwrap"><input class="nopre" type="number" id="age" min="21" max="75" step="1" placeholder="35" /></div>
@@ -256,9 +368,9 @@
         </div>
 
         <div>
-          <label class="lab" for="salary">Monthly salary (gross)</label>
+          <label class="lab" for="salary" id="salaryLab">Monthly salary (gross)</label>
           <div class="inputwrap"><span class="pre">$</span><input type="number" id="salary" min="0" max="60000" step="50" placeholder="6,000" /></div>
-          <div class="hint">CPF is capped at the first $8,000/month in 2026.</div>
+          <div class="hint" id="salaryHint">CPF is capped at the first $8,000/month in 2026.</div>
         </div>
 
         <div class="field-full">
@@ -270,13 +382,29 @@
         </div>
 
         <div class="field-full">
-          <label class="lab" for="growth">Expected annual salary increase</label>
+          <label class="lab" for="growth" id="growthLab">Expected annual salary increase</label>
           <div class="sliderrow">
             <input type="range" id="growth" min="0" max="8" step="0.5" value="3" />
             <span class="slidval" id="growthVal">3.0%</span>
           </div>
           <div class="hint">Applied each year until age 55. Set to 0% for a flat, conservative estimate.</div>
         </div>
+
+        <div class="field-full">
+          <label class="lab" for="topup">Annual RSTU top-up <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— cash to Special / Retirement Account</span></label>
+          <div class="inputwrap"><span class="pre">$</span><input type="number" id="topup" min="0" max="50000" step="500" placeholder="0" /></div>
+          <div class="hint">Goes only to SA/RA (best for retirement). First $8,000/yr earns tax relief; capped at the Full Retirement Sum.</div>
+        </div>
+
+        <div class="field-full">
+          <label class="lab" for="vc3a">Annual VC-3A contribution <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— voluntary, split across OA · SA · MA</span></label>
+          <div class="inputwrap"><span class="pre">$</span><input type="number" id="vc3a" min="0" max="40000" step="500" placeholder="0" /></div>
+          <div class="hint">The way to also build your OA. Split by your age's allocation rates; capped at the CPF Annual Limit ($37,740) minus mandatory CPF. No tax relief on the OA/SA portion.</div>
+        </div>
+      </div>
+
+      <div class="assume" id="assumeNote">
+        <span>✦</span> Figures assume <b>2.5% long-run inflation</b> (Singapore's rate has been steady) and CPF limits that grow on past trends. Used to show payouts in today's dollars.
       </div>
 
       <div style="margin-top:28px" class="sectlabel">Step 02</div>
@@ -311,26 +439,26 @@
   <section id="results">
 
     <div class="panel reveal" id="r1">
-      <div class="sectlabel">Step 03 — Your outlook</div>
-      <div class="secttitle" id="outlookTitle">Where your CPF is headed</div>
+      <div class="sectlabel" id="r1kicker">Step 03 — Your savings at 55</div>
+      <div class="secttitle" id="outlookTitle">What you'll have built by 55</div>
       <div class="heroStats">
         <div class="stat">
           <div class="lab2" id="s1lab">Total CPF at 55</div>
           <div class="num"><small>$</small><span id="s1" data-target="0">0</span></div>
-          <div class="cap" id="s1cap">OA + MediSave + Retirement Account</div>
+          <div class="cap" id="s1cap">OA + SA + MediSave</div>
           <div class="spark">✦</div>
         </div>
         <div class="stat">
-          <div class="lab2">RA at 65 · CPF LIFE premium</div>
+          <div class="lab2" id="s2lab">Available for your Retirement Account</div>
           <div class="num"><small>$</small><span id="s2" data-target="0">0</span></div>
-          <div class="cap">The capital that funds your lifelong payouts</div>
+          <div class="cap" id="s2cap">Your OA + SA — this funds your RA and any cash withdrawal</div>
           <div class="spark">✦</div>
         </div>
-        <div class="stat feature">
-          <div class="lab2">Est. monthly payout from 65</div>
+        <div class="stat">
+          <div class="lab2">MediSave</div>
           <div class="num"><small>$</small><span id="s3" data-target="0">0</span></div>
-          <div class="cap" id="s3cap">CPF LIFE Standard Plan</div>
-          <div class="spark" style="color:rgba(203,182,224,.14)">✦</div>
+          <div class="cap">Stays for healthcare — not part of CPF LIFE</div>
+          <div class="spark">✦</div>
         </div>
       </div>
     </div>
@@ -351,60 +479,81 @@
       </div>
     </div>
 
+    <!-- STAGE 1 — at 55 -->
     <div class="panel reveal" id="r3">
-      <div class="card">
+      <div class="sectlabel" id="r3kicker">Step 04 · At age 55 — first decision</div>
+      <div class="secttitle" id="r3title">How much to set aside for retirement</div>
+      <div id="age55edu"></div>
+      <div class="card" style="margin-top:18px" id="sumCard">
+        <div class="sectlabel">Choose your retirement sum</div>
+        <div class="secttitle" style="font-size:21px">Pick how much stays in your Retirement Account</div>
+        <div class="sumsel" id="sumSel"></div>
+        <div id="sumOutcome"></div>
+      </div>
+      <div class="card" style="margin-top:18px">
         <div class="sectlabel">Composition</div>
-        <div class="secttitle" id="bdTitle">How it splits at age 55</div>
+        <div class="secttitle" id="bdTitle">Your accounts after this choice</div>
         <div class="bd" id="breakdown"></div>
       </div>
     </div>
 
+    <!-- STAGE 2 — from 65 -->
     <div class="panel reveal" id="r4">
-      <div class="sectlabel">Step 04 — The payouts</div>
-      <div class="secttitle">Three plans, your way</div>
-      <p style="color:var(--ink2);max-width:620px;margin-top:8px;font-size:14.5px">CPF LIFE gives you three plans. These are your estimated payouts if you start at 65, based on your projected Retirement Account.</p>
-      <div class="plans" id="planCards"></div>
-    </div>
-
-    <div class="panel reveal" id="r5">
-      <div class="card chartcard">
-        <div class="chart-head">
-          <div>
-            <div class="sectlabel">Every permutation</div>
-            <div class="secttitle">Payout over your lifetime</div>
+      <div class="sectlabel">Step 05 · From age 65 — second decision</div>
+      <div class="secttitle">How you'd like to be paid</div>
+      <div class="card" style="margin-top:18px">
+        <div class="paycontrols">
+          <div class="cgrp">
+            <span class="lab" style="margin:0">CPF LIFE plan</span>
+            <div class="seg" id="segPlan" role="group" aria-label="CPF LIFE plan">
+              <button type="button" data-v="Standard" aria-pressed="true">Standard</button>
+              <button type="button" data-v="Escalating" aria-pressed="false">Escalating</button>
+              <button type="button" data-v="Basic" aria-pressed="false">Basic</button>
+            </div>
           </div>
-          <div class="ctrlrow">
-            <span class="lab" style="margin:0">Start payouts at</span>
+          <div class="cgrp">
+            <span class="lab" style="margin:0">Start payouts at age</span>
             <div class="seg" id="segAge" role="group" aria-label="Payout start age"></div>
           </div>
         </div>
-        <div class="legend" style="margin-bottom:8px">
-          <span><i class="swatch" style="background:#6F4A8E"></i> Standard</span>
-          <span><i class="swatch" style="background:#3F8F5B"></i> Escalating</span>
-          <span><i class="swatch" style="background:#9A3B32"></i> Basic</span>
+        <div class="heroStats" style="grid-template-columns:1fr; margin-top:22px">
+          <div class="stat feature">
+            <div class="lab2" id="payLab">Your monthly payout</div>
+            <div class="num"><small>$</small><span id="payHead" data-target="0">0</span><small> /mo</small></div>
+            <div class="todaynote" id="payReal"></div>
+            <div class="cap" id="payCap"></div>
+            <div class="spark" style="color:rgba(203,182,224,.14)">✦</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:22px" class="sectlabel">Compare all three plans</div>
+      <div class="secttitle" style="font-size:21px" id="planSubtitle">At your chosen retirement sum &amp; start age</div>
+      <div class="plans" id="planCards"></div>
+
+      <div class="card chartcard" style="margin-top:22px">
+        <div class="chart-head">
+          <div>
+            <div class="sectlabel">Over your lifetime</div>
+            <div class="secttitle">How each plan pays out as you age</div>
+          </div>
+          <div class="legend">
+            <span><i class="swatch" style="background:#6F4A8E"></i> Standard</span>
+            <span><i class="swatch" style="background:#3F8F5B"></i> Escalating</span>
+            <span><i class="swatch" style="background:#9A3B32"></i> Basic</span>
+          </div>
         </div>
         <div id="lifeChart"></div>
         <p style="color:var(--ink3);font-size:11.5px;margin-top:14px">The Escalating Plan starts lower but grows 2% every year — it typically overtakes the Standard Plan in your late 70s to early 80s.</p>
       </div>
-    </div>
 
-    <div class="panel reveal" id="r6">
-      <div class="card">
+      <div class="card" style="margin-top:22px">
         <div class="sectlabel">Full matrix</div>
         <div class="secttitle">Monthly payout by plan &amp; start age</div>
         <div class="matrix-scroll">
           <table class="matrix" id="matrix"></table>
         </div>
         <p style="color:var(--ink3);font-size:11.5px;margin-top:14px">Escalating figures show the <i>initial</i> monthly payout; it rises 2%/yr thereafter. Deferring each year past 65 adds roughly 7% to your payout.</p>
-      </div>
-    </div>
-
-    <div class="panel reveal" id="r7">
-      <div class="card">
-        <div class="sectlabel">For context</div>
-        <div class="secttitle">If you set aside each retirement sum</div>
-        <p style="color:var(--ink2);max-width:620px;margin-top:8px;font-size:14.5px">Standard Plan payout from 65 at the three benchmark sums for your cohort (projected to the year you turn 55).</p>
-        <div class="cmp" id="cmp"></div>
       </div>
     </div>
 
@@ -415,7 +564,7 @@
     </div>
 
     <div class="disclaimer">
-      <b>Important — please read.</b> This tool produces <b>illustrative estimates only</b> and is not financial advice, an offer, or a guarantee of any payout. Figures use 2026 CPF parameters (contribution &amp; allocation rates, $8,000 monthly wage ceiling, 2.5% OA / 4% SMRA interest with extra-interest tiers, BRS $110,200 · FRS $220,400 · ERS $440,800) and assume contributions continue to age 55, after which balances grow at CPF interest with no further contributions or withdrawals. CPF LIFE payouts are modelled from CPF Board's published Standard-Plan estimates (male basis, ~7% female adjustment) and interpolated; Basic and Escalating figures are approximations. Actual CPF rules, interest rates, retirement sums, and payouts are set by the CPF Board and change over time. Verify any figure with the official <a href="https://www.cpf.gov.sg" target="_blank" rel="noopener" style="color:var(--accent)">CPF LIFE Estimator</a> and a licensed adviser before acting.
+      <b>Important — please read.</b> This tool produces <b>illustrative estimates only</b> and is not financial advice, an offer, or a guarantee of any payout. Figures start from 2026 CPF parameters (age-based contribution &amp; allocation rates, $8,000 monthly wage ceiling, 2.5% OA / 4% Special-MediSave-Retirement interest, MediSave/Basic Healthcare Sum $79,000, BRS $110,200 · FRS $220,400 · ERS $440,800). Interest follows CPF's rules: extra interest of +1% on the first $60,000 of combined balances below 55 (and +2%/+1% on the first $30k/next $30k from 55), capped at $20,000 of OA and applied in the order RA→OA→SA→MA; because CPF computes interest monthly and contributions only earn interest from the following month, this year's contributions are credited about half a year of interest (an annual approximation of CPF's monthly method). Because these limits rise over time, the projection grows them forward on historical trends — <b>BHS ~4.5%/yr (frozen at age 65), the wage ceiling ~3%/yr, and the retirement sums ~3.5%/yr</b> — and assumes contributions continue to age 55, after which balances grow at CPF interest with no further contributions or withdrawals. Payouts are shown in future (nominal) dollars; the "today's dollars" figures discount them to 2026 at an assumed <b>2.5% long-run inflation</b> rate (Singapore's inflation has been broadly stable). The RSTU top-up you enter is treated as a cash top-up to your SA, capped each year at the prevailing Full Retirement Sum (the first $8,000/yr also qualifies for income-tax relief). The VC-3A contribution is a voluntary contribution split across OA/SA/MA by your age's allocation rates and capped at the CPF Annual Limit ($37,740, grown on trend) minus mandatory CPF; it is the route that also builds your Ordinary Account, and its OA/SA portion does not attract tax relief. For <b>self-employed persons</b>, only MediSave is compulsory (modelled at 8–10.5% of net trade income by age, on income above $6,000 up to the annual ceiling); OA/SA build only from MediSave that overflows the BHS and from voluntary top-ups, so payouts are typically far lower unless you top up. CPF LIFE payouts are modelled from CPF Board's published Standard-Plan estimates (male basis, ~7% female adjustment) and interpolated; Basic and Escalating figures are approximations. These growth and inflation rates are assumptions, not guarantees — actual CPF rules, interest rates, limits, and payouts are set by the CPF Board and change over time. Verify any figure with the official <a href="https://www.cpf.gov.sg" target="_blank" rel="noopener" style="color:var(--accent)">CPF LIFE Estimator</a> and a licensed adviser before acting.
     </div>
   </section>
 
@@ -432,15 +581,25 @@
    published CPF LIFE Standard-Plan payout estimates.
    ═══════════════════════════════════════════════════════════════ */
 const Y0 = 2026;
-const CEIL = 8000;            // monthly Ordinary Wage ceiling 2026
-const BHS  = 75500;           // Basic Healthcare Sum 2026 (MA cap)
-const RS   = { BRS:110200, FRS:220400, ERS:440800 }; // turning 55 in 2026
-const RS_G = 0.035;           // retirement sums grow ~3.5%/yr
+// ── Account limits & their growth (trends from CPF history) ──────────────
+// Each limit is projected forward from its 2026 value at the trend rate.
+const CEIL_2026 = 8000;       // monthly Ordinary Wage ceiling, 2026
+const CEIL_G    = 0.03;       // assume ~3%/yr (wage growth) going forward
+const BHS_2026  = 79000;      // Basic Healthcare Sum (MediSave cap), 2026
+const BHS_G     = 0.045;      // ~4.5%/yr trend (63k→79k over 2021–26); FROZEN at 65
+const RS   = { BRS:110200, FRS:220400, ERS:440800 }; // retirement sums, turning 55 in 2026
+const RS_G = 0.035;           // retirement sums grow ~3.5%/yr (213k→220.4k FRS)
+const ANNUAL_LIMIT_2026 = 37740; // CPF Annual Limit (caps total voluntary VC-3A)
+const ANN_G = 0.03;           // grows with the salary ceiling assumption
+const owCeil   = y => CEIL_2026 * Math.pow(1+CEIL_G, y-Y0); // monthly OW ceiling in year y
+const bhs      = y => BHS_2026  * Math.pow(1+BHS_G,  y-Y0); // BHS in year y (before 65)
+const annLimit = y => ANNUAL_LIMIT_2026 * Math.pow(1+ANN_G, y-Y0); // CPF Annual Limit in year y
 const FEMALE_ADJ = 0.93;      // CPF LIFE female payout ≈ 7% lower
 const DEFER = 0.07;           // ≈ +7% payout per year deferred past 65
 const ESC_INIT = 0.79;        // Escalating initial ≈ 79% of Standard
 const ESC_GROW = 0.02;        // Escalating grows 2%/yr
 const BASIC_INIT = 0.95;      // Basic initial ≈ 95% of Standard
+const INFL_DEFAULT = 2.5;     // default inflation assumption (% per yr)
 
 // Allocation rates 2026 — fraction of (capped) wage to each account.
 const ALLOC = [
@@ -454,6 +613,11 @@ const ALLOC = [
   {max:200,oa:.01,  ra:.01,  ma:.105},
 ];
 const band = a => ALLOC.find(b => a <= b.max);
+
+// Self-employed persons: only MediSave is compulsory (no OA/SA). Rate by age,
+// on net trade income above $6,000, capped at the annual income ceiling.
+const SEP_MIN_NTI = 6000;
+const sepMArate = a => a < 35 ? 0.08 : a < 45 ? 0.09 : a < 50 ? 0.10 : 0.105;
 
 // Official CPF LIFE reference tables (2026 basis, Standard Plan, male).
 //   SP : savings set aside at 55  →  CPF LIFE premium at 65
@@ -479,29 +643,91 @@ function premium65From(ra, age){
 function project(inp){
   let {age, salary, growth, oa, sa, ma, ra} = inp;
   let OA=oa, SA=sa, MA=ma, RA=ra, sal=salary;
+  const sep = inp.empType === 'sep';
   const accumulated = age < 55;
   const series=[{age, OA, SA, MA, RA, total:OA+SA+MA+RA}];
 
-  // Phase 1 — accumulate to 55
+  const topup = Math.max(0, inp.topup||0);   // annual RSTU cash top-up (→ SA)
+  const vc3a  = Math.max(0, inp.vc3a||0);    // annual VC-3A voluntary contribution (→ OA/SA/MA)
+  let topupTotal = 0, vc3aTotal = 0;
+  let at55 = null;
+
+  // Phase 1 — accumulate to 55. Order each year: contributions + top-up →
+  // MediSave spillover (BHS) → interest on every account (incl. extra interest).
   if (age < 55){
     for (let a=age; a<55; a++){
-      const wage = Math.min(sal, CEIL) * 12;
+      const year = Y0 + (a - age);                        // calendar year at this age
+      const ceilYr = owCeil(year);
       const bd = band(a);
-      OA += wage*bd.oa; SA += wage*(bd.sa||0); MA += wage*bd.ma;
-      if (MA > BHS){ SA += (MA-BHS); MA = BHS; }          // MA overflow → SA pre-55
-      const comb = Math.min(OA,20000) + SA + MA;          // extra interest base (pre-55)
-      const extra = 0.01*Math.min(60000, comb);
-      OA*=1.025; SA*=1.04; MA*=1.04; SA += extra;
+      const cap = bhs(year);
+      // opening balances (present all year → full-year interest)
+      const oOA=OA, oSA=SA, oMA=MA;
+      // this year's inflows (CPF credits interest from the FOLLOWING month →
+      // a year of monthly contributions earns ~half a year of interest)
+      let inOA, inSA, inMA;
+      if (sep){
+        // Self-employed: only compulsory MediSave on net trade income (no OA/SA).
+        const nti = Math.min(sal*12, ceilYr*12);          // annual NTI, capped at the ceiling
+        inOA = 0; inSA = 0;
+        inMA = nti > SEP_MIN_NTI ? sepMArate(a)*nti : 0;
+      } else {
+        const wage = Math.min(sal, ceilYr) * 12;          // salaried: 37% split, capped at OW ceiling
+        inOA = wage*bd.oa; inSA = wage*(bd.sa||0); inMA = wage*bd.ma;
+      }
+      const mand = inOA + inSA + inMA;                     // mandatory CPF this year (for VC-3A room)
+      // RSTU cash top-up goes straight to SA (pre-55), capped at this year's FRS
+      const frsY = RS.FRS * Math.pow(1+RS_G, year-Y0);
+      const tu = Math.min(topup, Math.max(0, frsY - (oSA + inSA)));
+      inSA += tu; topupTotal += tu;
+      // VC-3A voluntary contribution → split across OA/SA/MA by allocation rates,
+      // capped at the CPF Annual Limit minus this year's mandatory CPF.
+      if (vc3a > 0){
+        const vc = Math.min(vc3a, Math.max(0, annLimit(year) - mand));
+        const tot = bd.oa + (bd.sa||0) + bd.ma;           // = 0.37 before 55
+        inOA += vc*bd.oa/tot; inSA += vc*(bd.sa||0)/tot; inMA += vc*bd.ma/tot;
+        vc3aTotal += vc;
+      }
+      // MediSave contributions above the BHS are redirected to SA (pre-55)
+      if (oMA + inMA > cap){ const sp = oMA + inMA - cap; inMA -= sp; inSA += sp; }
+      // base interest: full year on opening, half year on this year's inflows
+      const HY = 0.5;
+      const intOA = oOA*0.025 + inOA*0.025*HY;
+      const intSA = oSA*0.04  + inSA*0.04*HY;
+      const intMA = oMA*0.04  + inMA*0.04*HY;
+      // extra interest: +1% on first $60k combined, order OA(cap $20k)→SA→MA.
+      // OA's & SA's extra → SA; MA's extra stays in MA. (RA n/a before 55.)
+      const avgOA=oOA+HY*inOA, avgSA=oSA+HY*inSA, avgMA=oMA+HY*inMA;
+      const wOA=Math.min(avgOA,20000);
+      const wSA=Math.min(avgSA, Math.max(0,60000-wOA));
+      const wMA=Math.min(avgMA, Math.max(0,60000-wOA-wSA));
+      const exSA=(wOA+wSA)*0.01, exMA=wMA*0.01;
+      // credit everything
+      OA = oOA + inOA + intOA;
+      SA = oSA + inSA + intSA + exSA;
+      MA = oMA + inMA + intMA + exMA;
+      // interest can nudge MA past the BHS → redirect the excess to SA
+      if (MA > cap){ SA += MA - cap; MA = cap; }
       sal *= (1+growth);
       series.push({age:a+1, OA, SA, MA, RA, total:OA+SA+MA+RA});
     }
-    // Form RA at 55 — SA then OA up to the cohort's FRS
+    // ── Form the Retirement Account at 55 ──────────────────────────────
     const yrsTo55 = 55 - age;
     const frs55 = RS.FRS * Math.pow(1+RS_G, yrsTo55);
-    let need = frs55;
-    let m = Math.min(SA, need); RA+=m; SA-=m; need-=m;
-    if (need>0){ const m2=Math.min(OA,need); RA+=m2; OA-=m2; need-=m2; }
-    OA += SA; SA = 0;                                      // SA closes at 55
+    const brs55 = RS.BRS * Math.pow(1+RS_G, yrsTo55);
+    const ers55 = RS.ERS * Math.pow(1+RS_G, yrsTo55);
+    const SAbefore = SA, OAbefore = OA, MAat55 = MA;
+    const pot = SAbefore + OAbefore;                 // savings that can fund the RA (OA + SA)
+    // How much to set aside in the RA = the chosen retirement sum (default FRS),
+    // but never more than you actually have.
+    const targetSum = (inp.targetSum != null ? inp.targetSum : frs55);
+    let need = Math.min(targetSum, pot);
+    const fromSA = Math.min(SA, need); RA+=fromSA; SA-=fromSA; need-=fromSA;     // SA → RA first
+    const fromOA = need>0 ? Math.min(OA, need) : 0; RA+=fromOA; OA-=fromOA;      // OA tops up to the sum
+    const leftoverSA = SA; OA += SA; SA = 0;                                      // SA closes → OA (withdrawable)
+    at55 = { SAbefore, OAbefore, MAat55, pot, fromSA, fromOA, leftoverSA,
+             raFormed:RA, withdrawableOA:OA, chosenSum:targetSum,
+             shortfall:Math.max(0, targetSum - pot),
+             frs55, brs55, ers55, topupTotal, vc3aTotal };
     series[series.length-1] = {age:55, OA, SA:0, MA, RA, total:OA+MA+RA};
   }
 
@@ -509,17 +735,19 @@ function project(inp){
   const baseAge = Math.max(age, 55);
   const snap = { age:baseAge, OA, MA, RA, total:OA+MA+RA };
 
-  // Phase 2 — RA at 65 (CPF LIFE premium) + balances grown to 65 for display
+  // Phase 2 — RA at 65 (CPF LIFE premium) + OA/MA grown to 65 (MediSave still capped at BHS)
   const RA65 = premium65From(RA, baseAge);
   const yrsTo65 = Math.max(0, 65 - baseAge);
-  let OA65 = OA*Math.pow(1.025, yrsTo65);
-  let MA65 = MA*Math.pow(1.04,  yrsTo65);
-  // extend the series to 65 for the chart (only when RA already exists, i.e. age>=55)
-  if (!accumulated && baseAge < 65 && RA > 0){
-    const annual = Math.pow(RA65/RA, 1/yrsTo65);
-    let rr=RA, oo=OA, mm=MA;
-    for (let a=baseAge; a<65; a++){ rr*=annual; oo*=1.025; mm*=1.04;
-      series.push({age:a+1, OA:oo, SA:0, MA:mm, RA:rr, total:oo+mm+rr}); }
+  const yearAtBase = Y0 + (baseAge - age);
+  const extend = (!accumulated && baseAge < 65 && RA > 0); // extend chart only when RA already exists
+  const raAnnual = extend ? Math.pow(RA65/RA, 1/yrsTo65) : 1;
+  let OA65 = OA, MA65 = MA, rr = RA;
+  for (let k=0; k<yrsTo65; k++){
+    OA65 *= 1.025; MA65 *= 1.04;
+    const cap = bhs(yearAtBase + k + 1);                  // BHS keeps rising until 65
+    if (MA65 > cap){ OA65 += (MA65-cap); MA65 = cap; }    // post-55 MA overflow → OA
+    if (extend){ rr *= raAnnual;
+      series.push({age:baseAge+k+1, OA:OA65, SA:0, MA:MA65, RA:rr, total:OA65+MA65+rr}); }
   }
 
   // Phase 3 — payouts. Earliest start = max(65, current age).
@@ -543,7 +771,7 @@ function project(inp){
     return { tier:k, at55, payout: interp(P65, at65)*g };
   });
 
-  return { snap, RA65, OA65, MA65, total65:OA65+MA65+RA65, base65, ages, plans, bench, series, sex:inp.sex, age };
+  return { snap, RA65, OA65, MA65, total65:OA65+MA65+RA65, base65, ages, plans, bench, series, sex:inp.sex, age, infl:inp.infl||0, at55, topupTotal, vc3aTotal, sep };
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -551,7 +779,10 @@ function project(inp){
    ═══════════════════════════════════════════════════════════════ */
 const $ = s => document.querySelector(s);
 const fmt = n => Math.round(n).toLocaleString('en-SG');
-let SEX='M', START=65, MODEL=null;
+let SEX='M', EMP='salaried', START=65, PLAN='Standard', CHOSEN='FRS', MODEL=null, RUN_INPUT=null;
+
+// Present value: discount a future payout (begins at `startAge`) back to today (2026).
+const todayValue = (m, value, startAge) => value / Math.pow(1 + (m.infl||0), Math.max(0, startAge - m.age));
 
 // segmented: sex
 $('#segSex').addEventListener('click', e=>{
@@ -559,7 +790,27 @@ $('#segSex').addEventListener('click', e=>{
   [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b));
   SEX=b.dataset.v;
 });
-// slider
+// segmented: employment type — relabels the income field
+$('#segEmp').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b) return;
+  [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b));
+  EMP=b.dataset.v;
+  if (EMP==='sep'){
+    $('#salaryLab').textContent='Average monthly net trade income';
+    $('#salaryHint').textContent='Your trade income after expenses. As an SEP, only MediSave is compulsory — OA/SA are not.';
+    $('#growthLab').textContent='Expected annual income increase';
+  } else {
+    $('#salaryLab').textContent='Monthly salary (gross)';
+    $('#salaryHint').textContent='CPF is capped at the first $8,000/month in 2026.';
+    $('#growthLab').textContent='Expected annual salary increase';
+  }
+});
+// segmented: CPF LIFE plan (stage 2)
+$('#segPlan').addEventListener('click', e=>{
+  const b=e.target.closest('button'); if(!b||!MODEL) return;
+  PLAN=b.dataset.v; highlightPlanSeg(); refreshStage2(MODEL, false);
+});
+// sliders
 const gr=$('#growth'), grv=$('#growthVal');
 const setGr=()=>{ grv.textContent=parseFloat(gr.value).toFixed(1)+'%'; gr.style.setProperty('--fill',(gr.value/8*100)+'%'); };
 gr.addEventListener('input',setGr); setGr();
@@ -567,7 +818,16 @@ gr.addEventListener('input',setGr); setGr();
 $('#calcBtn').addEventListener('click', run);
 [...document.querySelectorAll('input')].forEach(i=>i.addEventListener('keydown',e=>{ if(e.key==='Enter') run(); }));
 
+// Re-render charts at the right size on rotate / resize.
+let _rz; window.addEventListener('resize',()=>{ clearTimeout(_rz); _rz=setTimeout(()=>{
+  if(!MODEL) return;
+  if(MODEL.series.length>1) drawAccChart(MODEL.series);
+  drawLifeChart(MODEL);
+},180); });
+
 function num(id){ const v=parseFloat($('#'+id).value); return isNaN(v)?null:v; }
+
+const tierVal = (m,k)=> k==='BRS'? m.at55.brs55 : k==='ERS'? m.at55.ers55 : m.at55.frs55;
 
 function run(){
   const err=$('#err'); err.textContent='';
@@ -576,41 +836,81 @@ function run(){
   if(age===null||age<21||age>75){ err.textContent='Please enter an age between 21 and 75.'; return; }
   if(salary===null||salary<0){ err.textContent='Please enter your monthly salary.'; return; }
   const growth=parseFloat(gr.value)/100;
+  const infl=INFL_DEFAULT/100;                 // consistent baked-in assumption
+  const topup=num('topup')||0;
+  const vc3a=num('vc3a')||0;
 
-  MODEL = project({age, salary, growth, sex:SEX, oa, sa, ma, ra});
+  RUN_INPUT = {age, salary, growth, infl, topup, vc3a, sex:SEX, empType:EMP, oa, sa, ma, ra};
+  CHOSEN='FRS'; PLAN='Standard';
+  MODEL = project(RUN_INPUT);                   // default set-aside = FRS
   START = MODEL.ages[0];
-  render(MODEL);
+
+  renderSummary(MODEL);
+  renderStage1(MODEL);
+  renderStage2(MODEL, true);
 
   const res=$('#results'); res.classList.add('show');
-  // staged reveal
-  const panels=['#r1','#r2','#r3','#r4','#r5','#r6','#r7','#r8'];
+  const panels=['#r1','#r2','#r3','#r4','#r8'];
   requestAnimationFrame(()=>{
     panels.forEach((p,i)=> setTimeout(()=>$(p).classList.add('in'), 80*i));
     const r1=$('#r1'); if(r1.scrollIntoView) r1.scrollIntoView({behavior:'smooth', block:'start'});
   });
 }
 
-function render(m){
-  const olderNow = m.age>=55;
-  $('#s1lab').textContent = olderNow? 'Total CPF today' : 'Total CPF at 55';
-  $('#outlookTitle').textContent = olderNow? 'Where your CPF stands' : 'Where your CPF is headed';
-  $('#bdTitle').textContent = olderNow? 'How it splits today' : 'How it splits at age 55';
-  $('#s1cap').textContent = 'OA + MediSave' + (m.snap.RA>0?' + Retirement Account':'');
-
+/* ── Stage 0 — accumulation summary (sum-independent) ── */
+function renderSummary(m){
+  const older = m.age>=55;
+  $('#r1kicker').textContent = older? 'Step 03 — Where you stand today' : 'Step 03 — Your savings at 55';
+  $('#outlookTitle').textContent = older? 'Your CPF today' : "What you'll have built by 55";
+  $('#s1lab').textContent = older? 'Total CPF today' : 'Total CPF at 55';
+  $('#s1cap').textContent = older? 'OA + MediSave + Retirement Account' : 'OA + SA + MediSave';
+  $('#s2lab').textContent = older? 'In your Retirement Account' : 'Available for your Retirement Account';
+  $('#s2cap').textContent = older? 'Funds your CPF LIFE payouts' : 'Your OA + SA — funds your RA and any cash withdrawal';
   countUp($('#s1'), m.snap.total);
-  countUp($('#s2'), m.RA65);
-  countUp($('#s3'), m.plans[0].Standard);
-  $('#s3cap').textContent = `CPF LIFE Standard Plan${m.age>=65?'':' · from age 65'} · ${m.sex==='F'?'female':'male'} basis`;
-
-  // Accumulation chart only makes sense when there's a path to plot.
+  countUp($('#s2'), older ? m.snap.RA : m.at55.pot);
+  countUp($('#s3'), older ? m.snap.MA : m.at55.MAat55);
   if (m.series.length > 1){ $('#r2').style.display=''; drawAccChart(m.series); }
   else { $('#r2').style.display='none'; }
+}
+
+/* ── Stage 1 — at 55: choose retirement sum ── */
+function renderStage1(m){
+  drawAge55Edu(m);
+  buildSumSelector(m);
+  drawSumOutcome(m);
   drawBreakdown(m.snap);
-  drawPlanCards(m);
+}
+function selectSum(k){
+  const val = tierVal(MODEL, k);
+  CHOSEN = k;
+  MODEL = project({...RUN_INPUT, targetSum: val});
+  [...document.querySelectorAll('#sumSel .sumtile')].forEach(t=>t.classList.toggle('on', t.dataset.k===k));
+  drawSumOutcome(MODEL);
+  drawBreakdown(MODEL.snap);
+  renderStage2(MODEL, true);
+}
+
+/* ── Stage 2 — from 65: choose plan + age ── */
+function renderStage2(m, animate){
   buildAgeSeg(m);
+  highlightPlanSeg();
+  refreshStage2(m, animate);
+}
+function highlightPlanSeg(){ [...$('#segPlan').children].forEach(x=>x.setAttribute('aria-pressed', x.dataset.v===PLAN)); }
+function refreshStage2(m, animate){
+  const p = m.plans.find(x=>x.age===START) || m.plans[0];
+  const val = p[PLAN];
+  if (animate) countUp($('#payHead'), val); else $('#payHead').textContent = fmt(val);
+  $('#payLab').textContent = `Your ${PLAN} Plan payout from age ${p.age}`;
+  $('#payCap').textContent = (PLAN==='Escalating'?'Initial payout, then rises 2%/yr · ':'') + `${m.sex==='F'?'female':'male'} basis`;
+  if (m.infl>0 && p.age>m.age){
+    $('#payReal').textContent = `≈ $${fmt(todayValue(m, val, p.age))}/mo in today's dollars`;
+    $('#payReal').style.display='';
+  } else { $('#payReal').style.display='none'; }
+  $('#planSubtitle').textContent = `If you start at age ${p.age} — all three plans`;
+  drawPlanCards(m);
   drawLifeChart(m);
   buildMatrix(m);
-  drawCmp(m);
 }
 
 /* count-up animation */
@@ -625,32 +925,159 @@ function countUp(el, target){
   requestAnimationFrame(step);
 }
 
+/* ── shared: crosshair + value readout on hover & touch ── */
+function wireHover(svg, host, stops, W){
+  const tip=host.querySelector('.tip');
+  const cursor=svg.querySelector('.cursor');
+  const marks=[...svg.querySelectorAll('.hmark')];
+  function show(clientX){
+    const rect=svg.getBoundingClientRect(); if(!rect.width) return;
+    const vbx=(clientX-rect.left)/rect.width*W;
+    let best=stops[0], bd=Infinity;
+    for(const s of stops){ const d=Math.abs(s.xv-vbx); if(d<bd){bd=d; best=s;} }
+    cursor.setAttribute('x1',best.xv); cursor.setAttribute('x2',best.xv); cursor.style.opacity=1;
+    marks.forEach((c,i)=>{ const mk=best.markers[i];
+      if(mk){ c.setAttribute('cx',best.xv); c.setAttribute('cy',mk.y); c.style.opacity=1; } else c.style.opacity=0; });
+    tip.innerHTML='<div class="tt-h">'+best.label+'</div>'+best.rows.map(r=>
+      `<div class="tt-r"><span><i style="background:${r.color}"></i>${r.name}</span><b>${r.val}</b></div>`).join('');
+    tip.style.opacity=1;
+    const pxc=(best.xv/W)*rect.width, half=tip.offsetWidth/2+6;
+    tip.style.left=Math.min(Math.max(pxc,half),rect.width-half)+'px';
+  }
+  function hide(){ tip.style.opacity=0; cursor.style.opacity=0; marks.forEach(c=>c.style.opacity=0); }
+  svg.addEventListener('mousemove',e=>show(e.clientX));
+  svg.addEventListener('mouseleave',hide);
+  svg.addEventListener('touchstart',e=>{ if(e.touches[0]) show(e.touches[0].clientX); },{passive:true});
+  svg.addEventListener('touchmove',e=>{ if(e.touches[0]){ show(e.touches[0].clientX); e.preventDefault(); } },{passive:false});
+  svg.addEventListener('touchend',hide);
+}
+
 /* ── accumulation chart (total + RA) ── */
 function drawAccChart(series){
-  const W=920,H=300,pad={l:54,r:18,t:18,b:34};
+  const mob=window.innerWidth<=600;
+  const W=mob?500:920, H=mob?320:300;
+  const pad=mob?{l:42,r:12,t:16,b:30}:{l:54,r:18,t:18,b:34};
+  const af=mob?15:11;
   const xs=series.map(d=>d.age), maxT=Math.max(...series.map(d=>d.total),1);
   const x=a=>pad.l+(a-xs[0])/(xs[xs.length-1]-xs[0]||1)*(W-pad.l-pad.r);
   const y=v=>H-pad.b-(v/maxT)*(H-pad.t-pad.b);
   const line=(key)=>series.map((d,i)=>(i?'L':'M')+x(d.age).toFixed(1)+' '+y(d[key]).toFixed(1)).join(' ');
   const area=line('total')+` L ${x(xs[xs.length-1])} ${H-pad.b} L ${x(xs[0])} ${H-pad.b} Z`;
-  // gridlines
   let grid='';
   for(let i=0;i<=4;i++){ const v=maxT*i/4, yy=y(v);
     grid+=`<line class="gridline" x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}"/>`+
-          `<text class="axis" x="${pad.l-8}" y="${yy+3}" text-anchor="end">$${fmt(v/1000)}k</text>`; }
+          `<text class="axis" style="font-size:${af}px" x="${pad.l-8}" y="${yy+af*0.32}" text-anchor="end">$${fmt(v/1000)}k</text>`; }
   let xlab='';
-  const step=Math.max(1,Math.round((xs.length-1)/6));
-  for(let i=0;i<xs.length;i+=step){ xlab+=`<text class="axis" x="${x(xs[i])}" y="${H-10}" text-anchor="middle">${xs[i]}</text>`; }
-  const lenT=2600,lenR=2600;
-  $('#accChart').innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+  const step=Math.max(1,Math.round((xs.length-1)/(mob?4:6)));
+  for(let i=0;i<xs.length;i+=step){ xlab+=`<text class="axis" style="font-size:${af}px" x="${x(xs[i])}" y="${H-10}" text-anchor="middle">${xs[i]}</text>`; }
+  const stops=series.map(d=>({ xv:x(d.age), label:'Age '+d.age,
+    rows:[{name:'Total CPF',color:'#6F4A8E',val:'$'+fmt(d.total)},{name:'Retirement Acct',color:'#CBB6E0',val:'$'+fmt(d.RA)}],
+    markers:[{y:y(d.total),color:'#6F4A8E'},{y:y(d.RA),color:'#CBB6E0'}] }));
+  $('#accChart').innerHTML=`<svg id="accSvg" class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
     <defs><linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#6F4A8E" stop-opacity=".22"/><stop offset="1" stop-color="#6F4A8E" stop-opacity="0"/>
     </linearGradient></defs>
     ${grid}${xlab}
     <path d="${area}" fill="url(#ag)"/>
-    <path d="${line('total')}" fill="none" stroke="#6F4A8E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="draw" style="--len:${lenT}"/>
-    <path d="${line('RA')}" fill="none" stroke="#CBB6E0" stroke-width="2.5" stroke-dasharray="2600" stroke-linecap="round" stroke-linejoin="round" class="draw" style="--len:${lenR}"/>
-  </svg>`;
+    <path d="${line('total')}" fill="none" stroke="#6F4A8E" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="draw" style="--len:2600"/>
+    <path d="${line('RA')}" fill="none" stroke="#CBB6E0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="draw" style="--len:2600"/>
+    <line class="cursor" y1="${pad.t}" y2="${H-pad.b}"/>
+    <circle id="hm0" class="hmark" r="4.5" fill="#6F4A8E" stroke="#FBF8F2" stroke-width="2"/>
+    <circle id="hm1" class="hmark" r="4.5" fill="#CBB6E0" stroke="#FBF8F2" stroke-width="2"/>
+    <rect class="hit" x="0" y="0" width="${W}" height="${H}"/>
+  </svg><div class="tip"></div>`;
+  wireHover($('#accSvg'), $('#accChart'), stops, W);
+}
+
+/* ── Stage 1a: education + "before 55" snapshot ── */
+function drawAge55Edu(m){
+  const host=$('#age55edu'), f=m.at55;
+  if(!f){   // already 55+ : RA already created
+    $('#r3kicker').textContent="Step 04 · You're past this milestone";
+    $('#r3title').textContent='Your Retirement Account is already set up';
+    $('#bdTitle').textContent='How your CPF splits today';
+    host.innerHTML=`<div class="edu"><p class="lead">At 55, CPF created your <b>Retirement Account</b> and closed your Special Account, moving those savings (topped up by your OA if needed) into the RA up to the Full Retirement Sum. From <b>age 65</b> (deferrable to 70 for bigger payouts) it pays you for life via CPF LIFE. The payout below is based on the RA you entered.</p></div>`;
+    return;
+  }
+  $('#r3kicker').textContent='Step 04 · At age 55 — first decision';
+  $('#r3title').textContent='How much to set aside for retirement';
+  $('#bdTitle').textContent='Your accounts after this choice';
+  const parts=[];
+  if(f.topupTotal>0) parts.push(`<b>$${fmt(f.topupTotal)}</b> in RSTU top-ups`);
+  if(f.vc3aTotal>0)  parts.push(`<b>$${fmt(f.vc3aTotal)}</b> in VC-3A`);
+  const topupLine = parts.length ? ` This includes ${parts.join(' and ')} you added along the way.` : '';
+  const sepNote = m.sep ? `<div class="assume" style="margin:0 0 18px"><span>✦</span> As a <b>self-employed person</b>, only MediSave is compulsory — no automatic OA/SA. Your RA builds only from MediSave that <b>overflows past the BHS</b> into SA, plus voluntary top-ups.</div>` : '';
+  host.innerHTML=`
+  <div class="edu">
+    ${sepNote}
+    <p class="lead">When you turn <b>55</b>, CPF creates your <b>Retirement Account (RA)</b> and your <b>Special Account closes</b>. Your first decision: <b>how much to keep in the RA</b> — at the Basic, Full or Enhanced Retirement Sum. Your SA moves in first, topped up by your OA; anything above the sum you can <b>withdraw as cash</b> (always at least $5,000). The more you keep in, the larger your lifelong CPF LIFE payout. MediSave stays separate, for healthcare.${topupLine}</p>
+    <div class="flowlabel" style="margin-top:24px">Just before 55 — what you've built</div>
+    <div class="preStats">
+      <div class="preStat"><div class="k">Ordinary · OA</div><div class="v">$${fmt(f.OAbefore)}</div></div>
+      <div class="preStat"><div class="k">Special · SA</div><div class="v">$${fmt(f.SAbefore)}</div></div>
+      <div class="preStat"><div class="k">MediSave · MA</div><div class="v">$${fmt(f.MAat55)}</div></div>
+      <div class="preStat tot"><div class="k">Available for RA · OA+SA</div><div class="v">$${fmt(f.pot)}</div></div>
+    </div>
+  </div>`;
+}
+
+/* ── Stage 1b: the BRS / FRS / ERS selector ── */
+function buildSumSelector(m){
+  const f=m.at55;
+  if(!f){ $('#sumCard').style.display='none'; return; }
+  $('#sumCard').style.display='';
+  const tiers=[
+    {k:'BRS', name:'Basic',    note:'Lowest set-aside — frees the most cash, but only if you own a home to pledge.'},
+    {k:'FRS', name:'Full',     note:'The standard default. Balanced payout; withdraw whatever is above it.'},
+    {k:'ERS', name:'Enhanced', note:'Highest set-aside for the biggest payout. Needs a top-up if your savings fall short.'},
+  ];
+  $('#sumSel').innerHTML=tiers.map(t=>{
+    const val=tierVal(m,t.k), afford=f.pot>=val;
+    const sub=afford?`✓ Your savings cover this`:`Need $${fmt(val-f.pot)} more to reach it`;
+    return `<button type="button" class="sumtile ${t.k===CHOSEN?'on':''}" data-k="${t.k}">
+      <div class="tk">${t.k} · ${t.name} Sum</div>
+      <div class="tv">$${fmt(val)}</div>
+      <div class="tn">${sub}</div>
+      <div class="tnote">${t.note}</div>
+    </button>`;
+  }).join('');
+  $('#sumSel').onclick=e=>{ const b=e.target.closest('.sumtile'); if(b) selectSum(b.dataset.k); };
+}
+
+/* ── Stage 1c: keep / withdraw / MediSave outcome for the chosen sum ── */
+function drawSumOutcome(m){
+  const f=m.at55; const host=$('#sumOutcome');
+  if(!f){ host.innerHTML=''; return; }
+  const kept=f.raFormed, withdraw=f.withdrawableOA, ma=f.MAat55;
+  const tierName={BRS:'Basic Retirement Sum',FRS:'Full Retirement Sum',ERS:'Enhanced Retirement Sum'}[CHOSEN];
+  const conds=[];
+  // Only surface conditions that actually apply to this choice & these numbers.
+  if(CHOSEN==='BRS') conds.push({warn:false, t:`Keeping only the BRS requires owning a property to <b>pledge</b> for the other half. Without one, the Full Retirement Sum must stay in your RA.`});
+  if(f.shortfall>0){
+    conds.push({warn:true, t:`Your savings are <b>$${fmt(f.shortfall)} short</b> of the ${tierName} — you'd reach $${fmt(kept)} unless you top up the difference. The payout below reflects what you actually reach.`});
+    conds.push({warn:false, t:`Everything goes into your RA, so there's nothing above your retirement sum to withdraw — though you can always take out at least <b>$5,000</b> at 55.`});
+  } else if(withdraw>=5000){
+    conds.push({warn:false, t:`Because your savings comfortably exceed the ${tierName}, the <b>$${fmt(withdraw)}</b> on top is yours from 55 — withdraw it, or leave it in your OA earning 2.5%.`});
+  } else if(withdraw>0){
+    conds.push({warn:false, t:`Only $${fmt(withdraw)} sits above your retirement sum — but you can always withdraw at least <b>$5,000</b> at 55.`});
+  } else {
+    conds.push({warn:false, t:`Everything goes into your RA, leaving nothing extra to withdraw — though you can always take out at least <b>$5,000</b> at 55.`});
+  }
+  host.innerHTML=`
+    <div class="outcome">
+      <div class="ocard keep"><div class="ol">Must stay in your RA</div><div class="ov">$${fmt(kept)}</div><div class="od">Pays you for life from 65 under CPF LIFE.</div></div>
+      <div class="ocard"><div class="ol">You can withdraw as cash</div><div class="ov">$${fmt(withdraw)}</div><div class="od">Yours from 55 — take it, or leave it in OA at 2.5%.</div></div>
+      <div class="ocard"><div class="ol">Stays in MediSave</div><div class="ov">$${fmt(ma)}</div><div class="od">Healthcare &amp; insurance; keeps earning 4%.</div></div>
+    </div>
+    <div class="conds">${conds.map(c=>`<div class="cond ${c.warn?'warn':''}"><span>${c.warn?'!':'✦'}</span><div>${c.t}</div></div>`).join('')}</div>
+    <div class="flow" style="margin-top:20px">
+      <div class="flowlabel">How that $${fmt(kept)} is assembled</div>
+      <div class="fnode"><div class="ic" style="background:#A9A093">SA</div><div class="ftxt"><div class="ft">From your Special Account</div><div class="fs">Moved in first; the SA then closes</div></div><div class="fv">$${fmt(f.fromSA)}</div></div>
+      <div class="farrow">↓</div>
+      <div class="fnode"><div class="ic" style="background:#A9A093">OA</div><div class="ftxt"><div class="ft">Topped up from Ordinary Account${f.fromOA>0?'':' — not needed'}</div><div class="fs">${f.fromOA>0?'Used only because SA fell short of the sum':'SA already covered the sum'}</div></div><div class="fv">$${fmt(f.fromOA)}</div></div>
+      <div class="farrow">↓</div>
+      <div class="fnode ra"><div class="ic" style="background:#6F4A8E">RA</div><div class="ftxt"><div class="ft">Your Retirement Account</div><div class="fs">Grows to ~$${fmt(m.RA65)} by 65 — the CPF LIFE premium</div></div><div class="fv">$${fmt(kept)}</div></div>
+    </div>`;
 }
 
 /* ── breakdown bars ── */
@@ -670,9 +1097,9 @@ function drawBreakdown(s){
   },120));
 }
 
-/* ── plan cards (start at 65) ── */
+/* ── plan cards at the chosen start age (selected plan highlighted) ── */
 function drawPlanCards(m){
-  const p=m.plans[0], a0=p.age;
+  const p=m.plans.find(x=>x.age===START)||m.plans[0], a0=p.age;
   const months=(90-a0)*12;
   const totStd=p.Standard*months;
   const totBasic=p.Basic*months;
@@ -685,22 +1112,28 @@ function drawPlanCards(m){
     {n:'Basic', badge:'Larger legacy', tl:'Lower payouts, more left for loved ones.',
       v:p.Basic, meta:`Bigger bequest to family. Est. total to 90: <b>$${fmt(totBasic)}</b>.`},
   ];
+  const showReal = m.infl>0 && a0>m.age;
   $('#planCards').innerHTML=cards.map(c=>`
-    <div class="plan">
+    <div class="plan${c.n===PLAN?' on':''}" data-plan="${c.n}">
       <span class="badge">${c.badge}</span>
       <h3>${c.n}</h3>
       <div class="tagline">${c.tl}</div>
       <div class="big"><small>$</small>${fmt(c.v)}<small> /mo</small></div>
+      ${showReal?`<div class="todayline">≈ $${fmt(todayValue(m,c.v,a0))}/mo <span>in today's dollars</span></div>`:''}
       <div class="meta">${c.meta}</div>
     </div>`).join('');
+  $('#planCards').onclick=e=>{ const c=e.target.closest('.plan'); if(!c) return;
+    PLAN=c.dataset.plan; highlightPlanSeg(); refreshStage2(MODEL,false); };
 }
 
 /* ── payout start-age segmented ── */
 function buildAgeSeg(m){
-  $('#segAge').innerHTML=m.ages.map((a,i)=>`<button type="button" data-a="${a}" aria-pressed="${i===0}">${a}</button>`).join('');
+  if(!m.ages.includes(START)) START=m.ages[0];
+  $('#segAge').innerHTML=m.ages.map(a=>`<button type="button" data-a="${a}" aria-pressed="${a===START}">${a}</button>`).join('');
   $('#segAge').onclick=e=>{ const b=e.target.closest('button'); if(!b) return;
-    [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed',x===b));
-    START=+b.dataset.a; drawLifeChart(m); };
+    START=+b.dataset.a;
+    [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed',+x.dataset.a===START));
+    refreshStage2(MODEL,false); };
 }
 
 /* ── lifetime payout chart for chosen start age ── */
@@ -711,50 +1144,48 @@ function drawLifeChart(m){
   const escSeries=[]; let e=p.Escalating;
   for(let a=a0;a<=aEnd;a++){ escSeries.push({a, v:e}); e*=(1+ESC_GROW); }
   const maxV=Math.max(std, basic, escSeries[escSeries.length-1].v)*1.08;
-  const W=920,H=300,pad={l:54,r:18,t:18,b:34};
+  const mob=window.innerWidth<=600;
+  const W=mob?500:920, H=mob?320:300;
+  const pad=mob?{l:48,r:12,t:16,b:30}:{l:54,r:18,t:18,b:34};
+  const af=mob?15:11;
   const x=a=>pad.l+(a-a0)/(aEnd-a0)*(W-pad.l-pad.r);
   const y=v=>H-pad.b-(v/maxV)*(H-pad.t-pad.b);
+  const yfmt=v=> v>=1000 ? '$'+(v/1000).toFixed(v>=10000?0:1)+'k' : '$'+Math.round(v);
   let grid='';
   for(let i=0;i<=4;i++){ const v=maxV*i/4, yy=y(v);
     grid+=`<line class="gridline" x1="${pad.l}" y1="${yy}" x2="${W-pad.r}" y2="${yy}"/>`+
-          `<text class="axis" x="${pad.l-8}" y="${yy+3}" text-anchor="end">$${fmt(v)}</text>`; }
-  let xlab=''; for(let a=a0;a<=aEnd;a+=5){ xlab+=`<text class="axis" x="${x(a)}" y="${H-10}" text-anchor="middle">${a}</text>`; }
+          `<text class="axis" style="font-size:${af}px" x="${pad.l-8}" y="${yy+af*0.32}" text-anchor="end">${yfmt(v)}</text>`; }
+  let xlab=''; for(let a=a0;a<=aEnd;a+=(mob?10:5)){ xlab+=`<text class="axis" style="font-size:${af}px" x="${x(a)}" y="${H-10}" text-anchor="middle">${a}</text>`; }
   const flat=v=>`M ${x(a0)} ${y(v)} L ${x(aEnd)} ${y(v)}`;
   const escPath=escSeries.map((d,i)=>(i?'L':'M')+x(d.a).toFixed(1)+' '+y(d.v).toFixed(1)).join(' ');
-  $('#lifeChart').innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
+  const stops=escSeries.map(d=>({ xv:x(d.a), label:'Age '+d.a,
+    rows:[{name:'Standard',color:'#6F4A8E',val:'$'+fmt(std)},
+          {name:'Escalating',color:'#3F8F5B',val:'$'+fmt(d.v)},
+          {name:'Basic',color:'#9A3B32',val:'$'+fmt(basic)}],
+    markers:[{y:y(std),color:'#6F4A8E'},{y:y(d.v),color:'#3F8F5B'},{y:y(basic),color:'#9A3B32'}] }));
+  $('#lifeChart').innerHTML=`<svg id="lifeSvg" class="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid meet">
     ${grid}${xlab}
-    <path d="${flat(basic)}" fill="none" stroke="#9A3B32" stroke-width="2.5" stroke-dasharray="6 5" class="draw" style="--len:1000" stroke-linecap="round"/>
+    <path d="${flat(basic)}" fill="none" stroke="#9A3B32" stroke-width="2.5" class="draw" style="--len:1000" stroke-linecap="round"/>
     <path d="${flat(std)}" fill="none" stroke="#6F4A8E" stroke-width="3" class="draw" style="--len:1000" stroke-linecap="round"/>
     <path d="${escPath}" fill="none" stroke="#3F8F5B" stroke-width="3" class="draw" style="--len:1400" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>`;
+    <line class="cursor" y1="${pad.t}" y2="${H-pad.b}"/>
+    <circle id="hm0" class="hmark" r="4.5" fill="#6F4A8E" stroke="#FBF8F2" stroke-width="2"/>
+    <circle id="hm1" class="hmark" r="4.5" fill="#3F8F5B" stroke="#FBF8F2" stroke-width="2"/>
+    <circle id="hm2" class="hmark" r="4.5" fill="#9A3B32" stroke="#FBF8F2" stroke-width="2"/>
+    <rect class="hit" x="0" y="0" width="${W}" height="${H}"/>
+  </svg><div class="tip"></div>`;
+  wireHover($('#lifeSvg'), $('#lifeChart'), stops, W);
 }
 
-/* ── full matrix ── */
+/* ── full matrix (highlights the chosen plan row & start-age column) ── */
 function buildMatrix(m){
-  const head=`<thead><tr><th>Plan</th>${m.ages.map(a=>`<th class="${a===65?'col65':''}">Age ${a}</th>`).join('')}</tr></thead>`;
+  const head=`<thead><tr><th>Plan</th>${m.ages.map(a=>`<th class="${a===START?'col65':''}">Age ${a}</th>`).join('')}</tr></thead>`;
   const rowDefs=[['Standard','level for life'],['Escalating','initial · +2%/yr'],['Basic','lower · bigger legacy']];
   const body='<tbody>'+rowDefs.map(([k,sub])=>`<tr>
       <th>${k}<small>${sub}</small></th>
-      ${m.plans.map(p=>`<td class="${p.age===65?'col65':''}">$${fmt(p[k])}</td>`).join('')}
+      ${m.plans.map(p=>`<td class="${p.age===START?'col65':''}">$${fmt(p[k])}</td>`).join('')}
     </tr>`).join('')+'</tbody>';
   $('#matrix').innerHTML=head+body;
-}
-
-/* ── benchmark comparison bars ── */
-function drawCmp(m){
-  const max=Math.max(...m.bench.map(b=>b.payout),1);
-  const names={BRS:'Basic Retirement Sum',FRS:'Full Retirement Sum',ERS:'Enhanced Retirement Sum'};
-  $('#cmp').innerHTML=m.bench.map(b=>`
-    <div class="cmp-item">
-      <div class="tier">${b.tier}</div>
-      <div class="tname">${names[b.tier]}</div>
-      <div class="cmp-bar"><div class="cmp-col" data-h="${(b.payout/max*100)}"></div></div>
-      <div class="cv">$${fmt(b.payout)}<span style="font-size:.55em;color:var(--ink3)"> /mo</span></div>
-      <div class="cs">set aside $${fmt(b.at55)} at 55</div>
-    </div>`).join('');
-  requestAnimationFrame(()=>setTimeout(()=>{
-    document.querySelectorAll('#cmp .cmp-col').forEach(c=>c.style.height=c.dataset.h+'%');
-  },140));
 }
 </script>
 </body>
