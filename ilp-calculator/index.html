@@ -269,6 +269,19 @@
         </div>
 
         <div class="field-full">
+          <label class="lab" for="focus">Investment focus <span style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--ink3)">— sets the fund charge &amp; a starting return for both sides</span></label>
+          <select id="focus">
+            <option value="tech">US / Global Tech</option>
+            <option value="equity">Global Equity</option>
+            <option value="asia">Asia / Emerging Markets</option>
+            <option value="balanced">Balanced (multi-asset)</option>
+            <option value="bonds">Bonds / Income</option>
+            <option value="custom">Custom (set your own)</option>
+          </select>
+          <div class="hint" id="focusHint">ILP: a Global Technology fund (~1.5%/yr). The robo invests in the same focus via low-cost ETFs.</div>
+        </div>
+
+        <div class="field-full">
           <label class="lab" for="gross">Assumed gross investment return <span id="grossVal" style="font-weight:400;text-transform:none;letter-spacing:0;color:var(--accent)">8.0% / yr</span></label>
           <div class="sliderrow"><input type="range" id="gross" min="0" max="12" step="0.5" value="8" /></div>
           <div class="hint">Prudential illustrates at 4% and 8%. This is before fund &amp; policy charges.</div>
@@ -356,8 +369,8 @@
     </div>
 
     <div class="ctaband reveal" id="r5">
-      <h2>Is an ILP the <em>right</em> home for your money?</h2>
-      <p>The next step is comparing this against a low-cost robo-investor on the same returns. Let's go through your numbers together.</p>
+      <h2>Which path is right for <em>you</em>?</h2>
+      <p>You've now seen what each option really costs. Whether an ILP, a robo, or a mix of both fits comes down to your goals, your protection needs, and your timeline — not just the numbers. Happy to talk it through, no obligation.</p>
       <a class="btn" target="_blank" rel="noopener" href="https://wa.me/6596337795?text=Hi!%20I%20used%20the%20ILP%20projection%20tool%20and%20would%20like%20to%20discuss%20my%20options.">
         <svg viewBox="0 0 32 32" width="20" height="20" fill="#25D366" aria-hidden="true"><path d="M16 3C9.4 3 4 8.4 4 15c0 2.1.6 4.2 1.6 6L4 29l8.2-1.6c1.7.9 3.7 1.4 5.8 1.4 6.6 0 12-5.4 12-12S22.6 3 16 3zm0 21.8c-1.8 0-3.6-.5-5.1-1.4l-.4-.2-4.9 1 1-4.8-.2-.4C5.5 18 5 16.5 5 15c0-6.1 4.9-11 11-11s11 4.9 11 11-4.9 10.8-11 10.8zm6.1-8.1c-.3-.2-2-1-2.3-1.1-.3-.1-.5-.2-.8.2-.2.3-.9 1.1-1.1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-1.9-1.8-2.3-.2-.3 0-.5.1-.7.1-.1.3-.4.5-.6.1-.2.2-.3.3-.5.1-.2 0-.4 0-.6 0-.2-.8-1.9-1.1-2.6-.3-.7-.6-.6-.8-.6h-.7c-.2 0-.6.1-.9.4-.3.3-1.2 1.2-1.2 2.9s1.2 3.3 1.4 3.6c.2.2 2.4 3.7 5.9 5.2.8.4 1.5.6 2 .7.8.3 1.6.2 2.2.1.7-.1 2-.8 2.3-1.6.3-.8.3-1.4.2-1.6-.1-.1-.3-.2-.6-.3z"/></svg>
         Chat with me on WhatsApp</a>
@@ -553,7 +566,7 @@ function syncPlanUI(){
   const P=PLANS[PLAN];
   $('#planBlurb').textContent = P.blurb;
   $('#premium').value = P.defaultPremium;
-  $('#fm').value = P.defaultFM; setFm();
+  applyFocus();                          // fund charge follows the chosen investment focus
   $('#premHint').textContent = `Regular yearly premium (min for full welcome bonus: $${fmt(P.wbMin[P.defaultTerm]||0)}).`;
   $('#assuredWrap').style.display = P.hasAssurance ? '' : 'none';   // assurance charge applies to PVA only
   fillTerms();
@@ -573,6 +586,21 @@ $('#segFreq').addEventListener('click', e=>{ const b=e.target.closest('button');
   [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b)); FREQ=b.dataset.v; });
 $('#segSex').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return;
   [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b)); SEX=b.dataset.v; });
+
+// Shared investment focus — sets the ILP fund charge + a starting return for BOTH sides.
+const FOCUS = {
+  tech:    {fm:1.5,  ret:8, note:'ILP: a Global Technology fund (~1.5%/yr). Robo: a tech / Nasdaq ETF — same sector, far cheaper.'},
+  equity:  {fm:1.3,  ret:7, note:'ILP: a Global Equity fund (~1.3%/yr). Robo: a global-equity ETF.'},
+  asia:    {fm:1.5,  ret:7, note:'ILP: an Asian / Emerging-Markets Equity fund (~1.5%/yr). Robo: an Asia / EM ETF.'},
+  balanced:{fm:1.2,  ret:5, note:'ILP: a multi-asset / managed fund (~1.2%/yr). Robo: a diversified ETF portfolio.'},
+  bonds:   {fm:0.75, ret:3, note:'ILP: a Global Bond fund (~0.75%/yr). Robo: a bond ETF.'},
+  custom:  {fm:null, ret:null, note:'Set the return and fund charge yourself below.'},
+};
+let FOCUS_KEY='tech';
+function applyFocus(){ const f=FOCUS[FOCUS_KEY]; $('#focusHint').textContent=f.note;
+  if(f.fm!=null){ $('#fm').value=f.fm; setFm(); }
+  if(f.ret!=null){ $('#gross').value=f.ret; setGross(); } }
+$('#focus').addEventListener('change', e=>{ FOCUS_KEY=e.target.value; applyFocus(); });
 $('#segSmoke').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return;
   [...e.currentTarget.children].forEach(x=>x.setAttribute('aria-pressed', x===b)); SMOKER=(b.dataset.v==='s'); });
 $('#segRobo').addEventListener('click', e=>{ const b=e.target.closest('button'); if(!b) return;
