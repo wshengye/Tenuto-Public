@@ -564,7 +564,7 @@
     </div>
 
     <div class="disclaimer">
-      <b>Important — please read.</b> This tool produces <b>illustrative estimates only</b> and is not financial advice, an offer, or a guarantee of any payout. Figures start from 2026 CPF parameters (age-based contribution &amp; allocation rates, $8,000 monthly wage ceiling, 2.5% OA / 4% Special-MediSave-Retirement interest, MediSave/Basic Healthcare Sum $79,000, BRS $110,200 · FRS $220,400 · ERS $440,800). Interest follows CPF's rules: extra interest of +1% on the first $60,000 of combined balances below 55 (and +2%/+1% on the first $30k/next $30k from 55), capped at $20,000 of OA and applied in the order RA→OA→SA→MA; because CPF computes interest monthly and contributions only earn interest from the following month, this year's contributions are credited about half a year of interest (an annual approximation of CPF's monthly method). Because these limits rise over time, the projection grows them forward on historical trends — <b>BHS ~4.5%/yr (frozen at age 65), the wage ceiling ~3%/yr, and the retirement sums ~3.5%/yr</b> — and assumes contributions continue to age 55, after which balances grow at CPF interest with no further contributions or withdrawals. Payouts are shown in future (nominal) dollars; the "today's dollars" figures discount them to 2026 at an assumed <b>2.5% long-run inflation</b> rate (Singapore's inflation has been broadly stable). The RSTU top-up you enter is treated as a cash top-up to your SA, capped each year at the prevailing Full Retirement Sum (the first $8,000/yr also qualifies for income-tax relief). The VC-3A contribution is a voluntary contribution split across OA/SA/MA by your age's allocation rates and capped at the CPF Annual Limit ($37,740, grown on trend) minus mandatory CPF; it is the route that also builds your Ordinary Account, and its OA/SA portion does not attract tax relief. For <b>self-employed persons</b>, only MediSave is compulsory (modelled at 8–10.5% of net trade income by age, on income above $6,000 up to the annual ceiling); OA/SA build only from MediSave that overflows the BHS and from voluntary top-ups, so payouts are typically far lower unless you top up. CPF LIFE payouts are modelled from CPF Board's published Standard-Plan estimates (male basis, ~7% female adjustment) and interpolated; Basic and Escalating figures are approximations. These growth and inflation rates are assumptions, not guarantees — actual CPF rules, interest rates, limits, and payouts are set by the CPF Board and change over time. Verify any figure with the official <a href="https://www.cpf.gov.sg" target="_blank" rel="noopener" style="color:var(--accent)">CPF LIFE Estimator</a> and a licensed adviser before acting.
+      <b>Important — please read.</b> This tool produces <b>illustrative estimates only</b> and is not financial advice, an offer, or a guarantee of any payout. Figures start from 2026 CPF parameters (age-based contribution &amp; allocation rates, $8,000 monthly wage ceiling, 2.5% OA / 4% Special-MediSave-Retirement interest, MediSave/Basic Healthcare Sum $79,000, BRS $110,200 · FRS $220,400 · ERS $440,800). Interest follows CPF's rules: extra interest of +1% on the first $60,000 of combined balances below 55 (and +2%/+1% on the first $30k/next $30k from 55), capped at $20,000 of OA and applied in the order RA→OA→SA→MA; because CPF computes interest monthly and contributions only earn interest from the following month, this year's contributions are credited about half a year of interest (an annual approximation of CPF's monthly method). Some limits rise over time and are grown on historical trends — <b>BHS ~4.5%/yr (frozen at age 65) and the retirement sums ~3.5%/yr</b> — while the <b>$8,000 wage ceiling and $37,740 CPF Annual Limit are held flat</b>, since the 2023–26 ceiling ramp has ended and no further increase is scheduled (these are policy figures raised only in occasional steps). MediSave above the BHS overflows to your SA up to the FRS, then to your OA. The projection assumes contributions continue to age 55, after which balances grow at CPF interest with no further contributions or withdrawals. Payouts are shown in future (nominal) dollars; the "today's dollars" figures discount them to 2026 at an assumed <b>2.5% long-run inflation</b> rate (Singapore's inflation has been broadly stable). The RSTU top-up you enter is treated as a cash top-up to your SA, capped each year at the prevailing Full Retirement Sum (the first $8,000/yr also qualifies for income-tax relief). The VC-3A contribution is a voluntary contribution split across OA/SA/MA by your age's allocation rates and capped at the CPF Annual Limit ($37,740, grown on trend) minus mandatory CPF; it is the route that also builds your Ordinary Account, and its OA/SA portion does not attract tax relief. For <b>self-employed persons</b>, only MediSave is compulsory (modelled at 8–10.5% of net trade income by age, on income above $6,000 up to the annual ceiling); OA/SA build only from MediSave that overflows the BHS and from voluntary top-ups, so payouts are typically far lower unless you top up. CPF LIFE payouts are modelled from CPF Board's published Standard-Plan estimates (male basis, ~7% female adjustment) and interpolated; Basic and Escalating figures are approximations. These growth and inflation rates are assumptions, not guarantees — actual CPF rules, interest rates, limits, and payouts are set by the CPF Board and change over time. Verify any figure with the official <a href="https://www.cpf.gov.sg" target="_blank" rel="noopener" style="color:var(--accent)">CPF LIFE Estimator</a> and a licensed adviser before acting.
     </div>
   </section>
 
@@ -584,13 +584,15 @@ const Y0 = 2026;
 // ── Account limits & their growth (trends from CPF history) ──────────────
 // Each limit is projected forward from its 2026 value at the trend rate.
 const CEIL_2026 = 8000;       // monthly Ordinary Wage ceiling, 2026
-const CEIL_G    = 0.03;       // assume ~3%/yr (wage growth) going forward
+const CEIL_G    = 0.00;       // HELD FLAT — the $8k ceiling is the end of a one-off
+                             // 2023–26 ramp; no further increase is scheduled. (It is
+                             // a policy figure raised in occasional steps, not yearly.)
 const BHS_2026  = 79000;      // Basic Healthcare Sum (MediSave cap), 2026
 const BHS_G     = 0.045;      // ~4.5%/yr trend (63k→79k over 2021–26); FROZEN at 65
 const RS   = { BRS:110200, FRS:220400, ERS:440800 }; // retirement sums, turning 55 in 2026
-const RS_G = 0.035;           // retirement sums grow ~3.5%/yr (213k→220.4k FRS)
+const RS_G = 0.035;           // retirement sums grow ~3.5%/yr (213k→220.4k FRS, announced yearly)
 const ANNUAL_LIMIT_2026 = 37740; // CPF Annual Limit (caps total voluntary VC-3A)
-const ANN_G = 0.03;           // grows with the salary ceiling assumption
+const ANN_G = 0.00;           // HELD FLAT — tied to the $102k annual salary ceiling, also unchanged
 const owCeil   = y => CEIL_2026 * Math.pow(1+CEIL_G, y-Y0); // monthly OW ceiling in year y
 const bhs      = y => BHS_2026  * Math.pow(1+BHS_G,  y-Y0); // BHS in year y (before 65)
 const annLimit = y => ANNUAL_LIMIT_2026 * Math.pow(1+ANN_G, y-Y0); // CPF Annual Limit in year y
@@ -687,8 +689,14 @@ function project(inp){
         inOA += vc*bd.oa/tot; inSA += vc*(bd.sa||0)/tot; inMA += vc*bd.ma/tot;
         vc3aTotal += vc;
       }
-      // MediSave contributions above the BHS are redirected to SA (pre-55)
-      if (oMA + inMA > cap){ const sp = oMA + inMA - cap; inMA -= sp; inSA += sp; }
+      // MediSave above the BHS overflows to SA — but only until SA reaches the
+      // FRS; any remainder then overflows to OA (pre-55 CPF rule).
+      if (oMA + inMA > cap){
+        const sp = oMA + inMA - cap; inMA -= sp;
+        const saRoom = Math.max(0, frsY - (oSA + inSA));
+        const toSA = Math.min(sp, saRoom);
+        inSA += toSA; inOA += (sp - toSA);
+      }
       // base interest: full year on opening, half year on this year's inflows
       const HY = 0.5;
       const intOA = oOA*0.025 + inOA*0.025*HY;
@@ -705,8 +713,12 @@ function project(inp){
       OA = oOA + inOA + intOA;
       SA = oSA + inSA + intSA + exSA;
       MA = oMA + inMA + intMA + exMA;
-      // interest can nudge MA past the BHS → redirect the excess to SA
-      if (MA > cap){ SA += MA - cap; MA = cap; }
+      // interest can nudge MA past the BHS → overflow to SA up to FRS, then OA
+      if (MA > cap){
+        const sp = MA - cap; MA = cap;
+        const toSA = Math.min(sp, Math.max(0, frsY - SA));
+        SA += toSA; OA += (sp - toSA);
+      }
       sal *= (1+growth);
       series.push({age:a+1, OA, SA, MA, RA, total:OA+SA+MA+RA});
     }
